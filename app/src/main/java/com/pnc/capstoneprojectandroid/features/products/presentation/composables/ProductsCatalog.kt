@@ -32,14 +32,20 @@ import kotlin.let
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -54,6 +60,20 @@ fun ProductsList(
     onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    // Case-insensitive filtering based on product name or product number
+    val filteredProducts = remember(searchQuery, products) {
+        if (searchQuery.isBlank()) {
+            products
+        } else {
+            products.filter { product ->
+                product.name.contains(searchQuery.trim(), ignoreCase = true) ||
+                        product.productNumber.contains(searchQuery.trim(), ignoreCase = true)
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         Card(
             modifier = Modifier
@@ -73,8 +93,29 @@ fun ProductsList(
             )
         }
 
+        // Search Bar TextField
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            placeholder = { Text("Search products...") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }) { // Clears and restores catalog
+                        Icon(Icons.Default.Clear, contentDescription = "Clear Search")
+                    }
+                }
+            },
+            singleLine = true
+        )
+
+        // Pass filtered list and handle empty state
         ProductsListBody(
-            products = products,
+            products = filteredProducts,
+            searchQuery = searchQuery,
             onProductClick = onProductClick,
             modifier = Modifier.weight(1f)
         )
@@ -84,6 +125,7 @@ fun ProductsList(
 @Composable
 private fun ProductsListBody(
     products: List<Products>,
+    searchQuery: String, // New parameter for search
     onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -94,16 +136,32 @@ private fun ProductsListBody(
     }
 
     Box(modifier = modifier) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(products, key = { it.id }) { product ->
-                ProductRow(
-                    product = product,
-                    onClick = { onProductClick(product.id) }
+        if (products.isEmpty() && searchQuery.isNotBlank()) {
+            // Empty state communication
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No products match \"$searchQuery\"",
+                    style = typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp)
                 )
-                HorizontalDivider()
+            }
+        } else {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(products, key = { it.id }) { product ->
+                    ProductRow(
+                        product = product,
+                        onClick = { onProductClick(product.id) }
+                    )
+                    HorizontalDivider()
+                }
             }
         }
 

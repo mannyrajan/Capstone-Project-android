@@ -109,7 +109,8 @@ fun ProductsList(
                     }
                 }
             },
-            singleLine = true
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp)
         )
 
         // Pass filtered list and handle empty state

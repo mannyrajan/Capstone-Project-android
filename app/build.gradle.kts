@@ -1,22 +1,25 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.devtools.ksp)
 }
 
 android {
-    namespace = "com.pnc.capstone"
+    namespace = "com.pnc.capstoneprojectandroid"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.pnc.capstone"
+        applicationId = "com.pnc.capstoneprojectandroid"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "BASE_URL", "\"https://api.bootcampcentral.com/api/\"")
     }
 
     buildTypes {
@@ -32,6 +35,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -51,9 +55,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation)
+    implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.okhttp)
+    implementation(libs.bundles.lifecycle)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.bundles.coil)
+    implementation(libs.androidx.navigation.compose)
 }

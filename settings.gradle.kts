@@ -22,5 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Capstone"
+rootProject.name = "CapstoneProjectAndroid"
 include(":app")
+ 

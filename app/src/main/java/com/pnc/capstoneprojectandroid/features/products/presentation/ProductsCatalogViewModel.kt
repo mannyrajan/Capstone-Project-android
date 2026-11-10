@@ -49,6 +49,7 @@ class ProductsCatalogViewModel @Inject constructor (
     fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+
     // Added this method to toggle or set the filter visibility
     fun setFilterVisibility(isVisible: Boolean) {
         _uiState.update { currentState ->

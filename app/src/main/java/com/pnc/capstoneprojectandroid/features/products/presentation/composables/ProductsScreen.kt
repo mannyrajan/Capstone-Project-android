@@ -47,8 +47,23 @@ fun ProductsScreen(
             }
 
             else -> ProductsList(
-                products = state.products,
-                onProductClick = onProductClick
+                filteredProducts = state.filteredProducts,
+                onProductClick = onProductClick,
+                onShowFilterChange = { showFilter ->
+                    viewModel.setFilterVisibility(showFilter)
+                }
+            )
+        }
+
+        // Modular call to the filter bottom sheet component
+        if (state.showFilter) {
+            ProductFilterSheet(
+                state = state,
+                onColorChange = { viewModel.updateColorFilter(it) },
+                onWarrantyChange = { viewModel.updateWarrantyFilter(it) },
+                onPriceChange = { viewModel.updatePriceFilter(it) },
+                onClearFilters = { viewModel.clearFilters() },
+                onDismiss = { viewModel.setFilterVisibility(false) }
             )
         }
     }

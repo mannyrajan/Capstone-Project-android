@@ -49,4 +49,47 @@ class ProductsCatalogViewModel @Inject constructor (
     fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+    // Added this method to toggle or set the filter visibility
+    fun setFilterVisibility(isVisible: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(showFilter = isVisible)
+        }
+    }
+
+    // adding filters in the viewmodel
+    // filter by color
+    fun updateColorFilter(color:String) {
+        _uiState.update { currentState ->
+            currentState.copy(colorFilter = color)
+        }
+    }
+    // filter by price
+    fun updatePriceFilter(price: Double) {
+        _uiState.update { currentState ->
+            currentState.copy(priceFilter = price)
+        }
+    }
+    // filter by warranty
+    fun updateWarrantyFilter(warranty: String) {
+        _uiState.update { currentState ->
+            currentState.copy(warrantyFilter = warranty)
+        }
+    }
+
+    fun clearFilters() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                colorFilter = "",
+                priceFilter = null,
+                warrantyFilter = ""
+            )
+        }
+    }
+
+
+
+
+
+
+
 }

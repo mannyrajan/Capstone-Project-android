@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,48 +34,84 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Filter
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import coil3.compose.AsyncImage
+import com.pnc.capstoneprojectandroid.features.products.presentation.state.ProductCatalogState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
 @Composable
 fun ProductsList(
-    products: List<Products>,
+    // changed input from raw List<Products> to accept the filtered list from state
+    filteredProducts: List<Products>,
     onProductClick: (Int) -> Unit,
+    onShowFilterChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
+    // moving listState and scope so the Scaffold can control the Back-to-Top button action
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showButton by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 3 }
+    }
+
     // Case-insensitive filtering based on product name or product number
-    val filteredProducts = remember(searchQuery, products) {
+    val displayedProducts = remember(searchQuery, filteredProducts) {
         if (searchQuery.isBlank()) {
-            products
+            filteredProducts
         } else {
-            products.filter { product ->
+            filteredProducts.filter { product ->
                 product.name.contains(searchQuery.trim(), ignoreCase = true) ||
                         product.productNumber.contains(searchQuery.trim(), ignoreCase = true)
             }
         }
     }
-
-    Column(modifier = modifier.fillMaxSize()) {
+Scaffold(
+    modifier = modifier.fillMaxSize(),
+    floatingActionButton = {
+        // back to top arrow button
+        AnimatedVisibility(visible = showButton) {
+            FloatingActionButton(
+                onClick = {scope.launch { listState.animateScrollToItem(0) }}
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowUp,
+                    contentDescription = "Back to top"
+                )
+            }
+        }
+    }
+) { innerPadding ->
+   Column(modifier = Modifier
+       .fillMaxSize()
+       .padding(innerPadding)
+   ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,14 +120,28 @@ fun ProductsList(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         ) {
-            Text(
-                text = "Products",
-                style = typography.headlineLarge,
-                textAlign = TextAlign.Center,
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Products",
+                    style = typography.headlineLarge,
+                    textAlign = TextAlign.Center,
+                    // removed due to it pushing the button of the screen
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(vertical = 16.dp)
+                )
+                IconButton(onClick = { onShowFilterChange(true) } ) {
+                    Icon(
+                        imageVector = Icons.Filled.FilterList,
+                        contentDescription = "Show Filter")
+                }
+            }
         }
 
         // Search Bar TextField
@@ -113,29 +164,33 @@ fun ProductsList(
             shape = RoundedCornerShape(8.dp)
         )
 
-        // Pass filtered list and handle empty state
+
         ProductsListBody(
-            products = filteredProducts,
+            products = displayedProducts,
             searchQuery = searchQuery,
             onProductClick = onProductClick,
+            listState = listState,
             modifier = Modifier.weight(1f)
         )
-    }
-}
+
+    } // end of Column
+
+} // end of Scaffold
+
+}// end of fun
+
+
+
+
 
 @Composable
 private fun ProductsListBody(
     products: List<Products>,
     searchQuery: String, // New parameter for search
     onProductClick: (Int) -> Unit,
+    listState:  androidx.compose.foundation.lazy.LazyListState,
     modifier: Modifier = Modifier
 ) {
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    val showButton by remember {
-        derivedStateOf { listState.firstVisibleItemIndex > 3 }
-    }
-
     Box(modifier = modifier) {
         if (products.isEmpty() && searchQuery.isNotBlank()) {
             // Empty state communication
@@ -166,18 +221,6 @@ private fun ProductsListBody(
             }
         }
 
-        AnimatedVisibility(
-            visible = showButton,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            FloatingActionButton(
-                onClick = { scope.launch { listState.animateScrollToItem(0) } }
-            ) {
-                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Back to top")
-            }
-        }
     }
 }
 

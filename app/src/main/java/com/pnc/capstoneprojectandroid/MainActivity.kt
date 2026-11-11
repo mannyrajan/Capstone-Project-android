@@ -61,11 +61,14 @@ class MainActivity : ComponentActivity() {
                                 route = "products/{productId}",
                                 arguments = listOf(navArgument("productId") { type = NavType.IntType })
                             ) {
-                                ProductDetailsScreen(onBack = { navController.popBackStack() })
+                                // adding back in padding to the details screen
+                                Box(modifier = Modifier.padding(innerPadding)) {
+                                    ProductDetailsScreen(onBack = { navController.popBackStack() })
+                                }
                             }
                             composable(route = "order_history") {
                                 OrderHistoryApp(
-//                                  onBack = { navController.popBackStack() }
+                                  onBack = { navController.popBackStack() }
                                 )
                             }
                         }

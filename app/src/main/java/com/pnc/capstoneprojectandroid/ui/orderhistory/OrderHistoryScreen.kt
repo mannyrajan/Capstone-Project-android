@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -46,7 +47,10 @@ import com.pnc.capstoneprojectandroid.features.orders.data.model.formatMoney
 import com.pnc.capstoneprojectandroid.features.orders.data.model.formatOrderDate
 
 @Composable
-fun OrderHistoryApp(viewModel: OrderHistoryViewModel = viewModel()) {
+fun OrderHistoryApp(
+    viewModel: OrderHistoryViewModel = viewModel(),
+    onBack: () -> Unit // adding callback to go back to customer home page
+) {
     val state by viewModel.state.collectAsState()
     BackHandler(enabled = state.selected != null) { viewModel.closeOrder() }
 
@@ -58,6 +62,7 @@ fun OrderHistoryApp(viewModel: OrderHistoryViewModel = viewModel()) {
             onQueryChange = viewModel::onQueryChange,
             onFilterChange = viewModel::onFilterChange,
             onOpen = viewModel::openOrder,
+            onBack = onBack
         )
     } else {
         OrderDetailScreen(
@@ -76,18 +81,19 @@ private fun OrderListScreen(
     onQueryChange: (String) -> Unit,
     onFilterChange: (ShipFilter) -> Unit,
     onOpen: (CustomerOrder) -> Unit,
+    onBack: () -> Unit // added callback to go back to customer home page
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Order history") },
-                actions = {
-                    IconButton(onClick = onRefresh) {
-                        Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
-                    }
-                },
-            )
-        },
+//        topBar = {
+//            TopAppBar(
+//                title = { Text("Order history") },
+//                actions = {
+//                    IconButton(onClick = onRefresh) {
+//                        Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
+//                    }
+//                },
+//            )
+//        },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
@@ -120,6 +126,44 @@ private fun OrderListScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
+                        // adding in custom blue header
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                  containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ){
+                                    IconButton(onClick = onBack) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Back to Home",
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                    Text(
+                                        text = "Order History",
+                                        style = MaterialTheme.typography.headlineLarge,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    )
+                                    IconButton(onClick = onRefresh) {
+                                        Icon(Icons.Filled.Refresh,
+                                            contentDescription = "Refresh",
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+
+                                }
+
+                            }
+                        }
                         item {
                             OutlinedTextField(
                                 value = state.query,

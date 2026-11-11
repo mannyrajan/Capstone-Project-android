@@ -7,10 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductDetailsScreen
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductsScreen
+import com.pnc.capstoneprojectandroid.features.products.presentation.composables.SavedProductsScreen
 import com.pnc.capstoneprojectandroid.ui.theme.CapstoneProjectAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -37,7 +35,9 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("products") {
-                            ProductsScreen(onProductClick = { id -> navController.navigate("products/$id") })
+                            ProductsScreen(
+                                onProductClick = { id -> navController.navigate("products/$id") }
+                            )
                         }
                         composable(
                             route = "products/{productId}",
@@ -45,12 +45,15 @@ class MainActivity : ComponentActivity() {
                         ) {
                             ProductDetailsScreen(onBack = { navController.popBackStack() })
                         }
+                        composable("saved") {
+                            SavedProductsScreen(
+                                onProductClick = { id -> navController.navigate("products/$id") },
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
-
-

@@ -2,6 +2,7 @@ package com.pnc.capstoneprojectandroid.core
 
 import com.pnc.capstoneprojectandroid.BuildConfig
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultProductsRepository
+import com.pnc.capstoneprojectandroid.features.products.data.DefaultSavedProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.domain.ProductsRepository
 import dagger.Binds
 import dagger.Module
@@ -15,6 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 import com.pnc.capstoneprojectandroid.features.products.data.ProductsDataSource
 import com.pnc.capstoneprojectandroid.features.products.data.RemoteProductsDataSource
+import com.pnc.capstoneprojectandroid.features.products.domain.SavedProductsRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -50,4 +52,10 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindRepository(impl: DefaultProductsRepository): ProductsRepository
+
+    @Binds
+    abstract fun bindSavedProductsRepository(
+        impl: DefaultSavedProductsRepository
+    ): SavedProductsRepository
+
 }

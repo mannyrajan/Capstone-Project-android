@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.coil)
     implementation(libs.androidx.navigation.compose)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

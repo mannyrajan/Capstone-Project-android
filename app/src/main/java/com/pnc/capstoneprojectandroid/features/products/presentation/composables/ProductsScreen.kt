@@ -21,6 +21,7 @@ import com.pnc.capstoneprojectandroid.features.products.presentation.ProductsCat
 @Composable
 fun ProductsScreen(
     onProductClick: (Int) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProductsCatalogViewModel = hiltViewModel()
 ) {
@@ -33,7 +34,9 @@ fun ProductsScreen(
             )
 
             state.errorMessage != null -> Column(
-                modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -49,6 +52,7 @@ fun ProductsScreen(
             else -> ProductsList(
                 filteredProducts = state.filteredProducts,
                 onProductClick = onProductClick,
+                onBack = onBack, // Passes the back action down into list header
                 onShowFilterChange = { showFilter ->
                     viewModel.setFilterVisibility(showFilter)
                 }

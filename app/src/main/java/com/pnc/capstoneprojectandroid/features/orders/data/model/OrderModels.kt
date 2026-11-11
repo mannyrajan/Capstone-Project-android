@@ -1,4 +1,4 @@
-package com.pnc.capstone.data.model
+package com.pnc.capstoneprojectandroid.features.orders.data.model
 
 import androidx.annotation.Keep
 import java.time.LocalDateTime

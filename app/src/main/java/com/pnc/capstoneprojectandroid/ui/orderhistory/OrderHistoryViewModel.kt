@@ -1,11 +1,11 @@
-package com.pnc.capstone.ui.orderhistory
+package com.pnc.capstoneprojectandroid.ui.orderhistory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pnc.capstone.data.api.OrderApiFactory
-import com.pnc.capstone.data.model.CustomerOrder
-import com.pnc.capstone.data.model.OrderShipping
-import com.pnc.capstone.data.repository.OrderRepository
+import com.pnc.capstoneprojectandroid.features.orders.data.api.OrderApiFactory
+import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderShipping
+import com.pnc.capstoneprojectandroid.features.orders.data.repository.OrderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

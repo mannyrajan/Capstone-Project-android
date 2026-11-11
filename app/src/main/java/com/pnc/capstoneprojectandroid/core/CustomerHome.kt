@@ -22,11 +22,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CustomerHome(
-    productCatalog: () -> Unit,
-    activitySummary: () -> Unit,
-    recentlyViewedProducts: List<Product>,
-    onProductClick: (Product) -> Unit
+fun CustomerHomeScreen(
+    onNavigateToProducts: () -> Unit,
+    onNavigateToOrders: () -> Unit,
+    recentlyViewedProducts: List<Product> = MockData.sampleRecentlyViewed,
+    onProductClick: (Int) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -37,7 +37,7 @@ fun CustomerHome(
         // Header
         item {
             Text(
-                text = "Welcome Adventure Works",
+                text = "Welcome to Adventure Works",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.testTag("dashboard-title")
             )
@@ -46,7 +46,7 @@ fun CustomerHome(
         // Product Catalog Button
         item {
             Button(
-                onClick = productCatalog,
+                onClick = onNavigateToProducts,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("view-product-catalog-button")
@@ -58,7 +58,7 @@ fun CustomerHome(
         // Summary of recent order activity Button
         item {
             Button(
-                onClick = activitySummary,
+                onClick = onNavigateToOrders,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("view-recent-orders-button")
@@ -78,7 +78,10 @@ fun CustomerHome(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(recentlyViewedProducts) { product ->
-                        ProductCard(product = product, onClick = { onProductClick(product) })
+                        ProductCard(
+                            product = product,
+                            onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
+                        )
                     }
                 }
             }
@@ -120,12 +123,10 @@ fun ProductCard(
 @Preview(showBackground = true)
 @Composable
 fun CustomerHomePreview() {
-    CustomerHome(
-        productCatalog = {},
-        activitySummary = {},
+    CustomerHomeScreen(
+        onNavigateToProducts = {},
+        onNavigateToOrders = {},
         recentlyViewedProducts = MockData.sampleRecentlyViewed,
-        onProductClick = { product ->
-            // Handle click action in preview if needed
-        }
+        onProductClick = {}
     )
 }

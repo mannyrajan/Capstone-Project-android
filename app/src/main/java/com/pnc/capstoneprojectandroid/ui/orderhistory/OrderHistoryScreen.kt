@@ -1,4 +1,4 @@
-package com.pnc.capstone.ui.orderhistory
+package com.pnc.capstoneprojectandroid.ui.orderhistory
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -40,10 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pnc.capstone.data.model.CustomerOrder
-import com.pnc.capstone.data.model.OrderLine
-import com.pnc.capstone.data.model.formatMoney
-import com.pnc.capstone.data.model.formatOrderDate
+import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderLine
+import com.pnc.capstoneprojectandroid.features.orders.data.model.formatMoney
+import com.pnc.capstoneprojectandroid.features.orders.data.model.formatOrderDate
 
 @Composable
 fun OrderHistoryApp(viewModel: OrderHistoryViewModel = viewModel()) {

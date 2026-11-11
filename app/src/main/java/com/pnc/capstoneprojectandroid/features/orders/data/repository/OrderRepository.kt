@@ -1,10 +1,10 @@
-package com.pnc.capstone.data.repository
+package com.pnc.capstoneprojectandroid.features.orders.data.repository
 
-import com.pnc.capstone.data.api.OrderApi
-import com.pnc.capstone.data.model.CustomerOrder
-import com.pnc.capstone.data.model.OrderLine
-import com.pnc.capstone.data.model.OrderShipping
-import com.pnc.capstone.data.model.personName
+import com.pnc.capstoneprojectandroid.features.orders.data.api.OrderApi
+import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderLine
+import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderShipping
+import com.pnc.capstoneprojectandroid.features.orders.data.model.personName
 
 class OrderRepository(private val api: OrderApi) {
     suspend fun getOrderHistory(): List<CustomerOrder> {

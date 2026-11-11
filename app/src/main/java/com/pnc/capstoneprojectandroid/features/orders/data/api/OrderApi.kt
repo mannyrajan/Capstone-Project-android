@@ -1,7 +1,7 @@
-package com.pnc.capstone.data.api
+package com.pnc.capstoneprojectandroid.features.orders.data.api
 
-import com.pnc.capstone.data.model.CustomerOrderDetailDto
-import com.pnc.capstone.data.model.CustomerOrderLineDto
+import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrderDetailDto
+import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrderLineDto
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

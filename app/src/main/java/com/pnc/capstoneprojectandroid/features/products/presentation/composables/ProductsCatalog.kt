@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import kotlin.let
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Clear
@@ -69,6 +70,7 @@ fun ProductsList(
     // changed input from raw List<Products> to accept the filtered list from state
     filteredProducts: List<Products>,
     onProductClick: (Int) -> Unit,
+    onBack: () -> Unit, // Added back action
     onShowFilterChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -127,19 +129,37 @@ Scaffold(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Products",
-                    style = typography.headlineLarge,
-                    textAlign = TextAlign.Center,
-                    // removed due to it pushing the button of the screen
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back to Home",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    Text(
+                        text = "Products",
+                        style = typography.headlineLarge,
+                        // recenter
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        // removed due to it pushing the button of the screen
 //                    modifier = Modifier
 //                        .fillMaxWidth()
 //                        .padding(vertical = 16.dp)
-                )
+                    )
+                }
+                // Filter Button
                 IconButton(onClick = { onShowFilterChange(true) } ) {
                     Icon(
                         imageVector = Icons.Filled.FilterList,
-                        contentDescription = "Show Filter")
+                        contentDescription = "Show Filter",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
         }
@@ -178,7 +198,6 @@ Scaffold(
 } // end of Scaffold
 
 }// end of fun
-
 
 
 

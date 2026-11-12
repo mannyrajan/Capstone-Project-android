@@ -10,17 +10,22 @@ import javax.inject.Singleton
 @Singleton
 class DefaultProductsRepository @Inject constructor(
     private val dataSource: ProductsDataSource
-): ProductsRepository {
+) : ProductsRepository {
 
     override fun observeProducts(): Flow<List<Products>> = flow {
-        emit(dataSource.getProducts().map {
-            ProductsMapper.mapToDomain(it)
-        })
+        emit(fetchProducts())
     }
 
-    override suspend fun refreshProducts() = Unit
+    override suspend fun refreshProducts(): List<Products> {
+        return fetchProducts()
+    }
+
+    private suspend fun fetchProducts(): List<Products> {
+        return dataSource.getProducts().map {
+            ProductsMapper.mapToDomain(it)
+        }
+    }
 
     override suspend fun getProduct(id: Int): Products =
         ProductsMapper.mapDetailsToDomain(dataSource.getProduct(id))
-
 }

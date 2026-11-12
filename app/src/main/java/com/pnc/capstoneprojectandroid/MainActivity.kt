@@ -72,13 +72,14 @@ class MainActivity : ComponentActivity() {
                                   onBack = { navController.popBackStack() }
                                 )
                             }
+                            composable(route = "saved") {
+                                SavedProductsScreen(
+                                    onProductClick = { id -> navController.navigate("products/$id") },
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
                         }
-                        composable("saved") {
-                            SavedProductsScreen(
-                                onProductClick = { id -> navController.navigate("products/$id") },
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
+
                     }
                 }
             }

@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,6 +51,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +73,8 @@ fun ProductsList(
     filteredProducts: List<Products>,
     onProductClick: (Int) -> Unit,
     onBack: () -> Unit, // Added back action
+    onRefresh: () -> Unit,
+    isRefreshing: Boolean,
     onShowFilterChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -94,46 +98,42 @@ fun ProductsList(
             }
         }
     }
-Scaffold(
-    modifier = modifier.fillMaxSize(),
-    floatingActionButton = {
-        // back to top arrow button
-        AnimatedVisibility(visible = showButton) {
-            FloatingActionButton(
-                onClick = {scope.launch { listState.animateScrollToItem(0) }}
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowUp,
-                    contentDescription = "Back to top"
-                )
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        floatingActionButton = {
+            // back to top arrow button
+            AnimatedVisibility(visible = showButton) {
+                FloatingActionButton(
+                    onClick = { scope.launch { listState.animateScrollToItem(0) } }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardArrowUp,
+                        contentDescription = "Back to top"
+                    )
+                }
             }
         }
-    }
-) { innerPadding ->
-   Column(modifier = Modifier
-       .fillMaxSize()
-       .padding(innerPadding)
-   ) {
-        Card(
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            Row(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Back arrow
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -141,65 +141,84 @@ Scaffold(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                    Text(
-                        text = "Products",
-                        style = typography.headlineLarge,
-                        // recenter
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        // removed due to it pushing the button of the screen
+
+                    // Products title
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Products",
+                            style = typography.headlineLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            // removed due to it pushing the button of the screen
 //                    modifier = Modifier
 //                        .fillMaxWidth()
 //                        .padding(vertical = 16.dp)
-                    )
-                }
-                // Filter Button
-                IconButton(onClick = { onShowFilterChange(true) } ) {
-                    Icon(
-                        imageVector = Icons.Filled.FilterList,
-                        contentDescription = "Show Filter",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
-        }
+                        )
+                    }
 
-        // Search Bar TextField
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            placeholder = { Text("Search products...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { searchQuery = "" }) { // Clears and restores catalog
-                        Icon(Icons.Default.Clear, contentDescription = "Clear Search")
+                    // Refresh and Filter buttons
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = onRefresh) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = "Refresh Products",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        // Filter Button
+                        // Refresh and Filter Buttons
+                        IconButton(onClick = { onShowFilterChange(true) }) {
+                            Icon(
+                                imageVector = Icons.Filled.FilterList,
+                                contentDescription = "Show Filter",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(8.dp)
-        )
+            }
+
+            // Search Bar TextField
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                placeholder = { Text("Search products...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) { // Clears and restores catalog
+                            Icon(Icons.Default.Clear, contentDescription = "Clear Search")
+                        }
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(8.dp)
+            )
 
 
-        ProductsListBody(
-            products = displayedProducts,
-            searchQuery = searchQuery,
-            onProductClick = onProductClick,
-            listState = listState,
-            modifier = Modifier.weight(1f)
-        )
+            ProductsListBody(
+                products = displayedProducts,
+                searchQuery = searchQuery,
+                onProductClick = onProductClick,
+                listState = listState,
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = Modifier.weight(1f)
+            )
 
-    } // end of Column
+        } // end of Column
 
-} // end of Scaffold
+    } // end of Scaffold
 
 }// end of fun
-
-
 
 
 @Composable
@@ -207,39 +226,46 @@ private fun ProductsListBody(
     products: List<Products>,
     searchQuery: String, // New parameter for search
     onProductClick: (Int) -> Unit,
-    listState:  androidx.compose.foundation.lazy.LazyListState,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
-        if (products.isEmpty() && searchQuery.isNotBlank()) {
-            // Empty state communication
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No products match \"$searchQuery\"",
-                    style = typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(products, key = { it.id }) { product ->
-                    ProductRow(
-                        product = product,
-                        onClick = { onProductClick(product.id) }
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier
+    ) {
+        Box(modifier = modifier) {
+            if (products.isEmpty() && searchQuery.isNotBlank()) {
+                // Empty state communication
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No products match \"$searchQuery\"",
+                        style = typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
                     )
-                    HorizontalDivider()
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(products, key = { it.id }) { product ->
+                        ProductRow(
+                            product = product,
+                            onClick = { onProductClick(product.id) }
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         }
-
     }
 }
 

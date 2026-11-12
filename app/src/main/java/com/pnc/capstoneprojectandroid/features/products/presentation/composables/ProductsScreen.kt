@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pnc.capstoneprojectandroid.features.products.presentation.ProductsCatalogViewModel
+import androidx.compose.material.icons.filled.Refresh
 
 @Composable
 fun ProductsScreen(
@@ -28,37 +29,77 @@ fun ProductsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            state.isLoading -> CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
 
-            state.errorMessage != null -> Column(
+        when {
+            // Initial loading
+            state.isLoading && state.products.isEmpty() -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            // Error when no products are available
+            state.errorMessage != null && state.products.isEmpty() -> {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = state.errorMessage ?: "",
+                        color = MaterialTheme.colorScheme.error
+                    )
+
+                    Button(onClick = { viewModel.loadProducts() }) {
+                        Text("Retry")
+                    }
+                }
+            }
+
+            // Display products, including while refreshing
+            else -> {
+                ProductsList(
+                    filteredProducts = state.filteredProducts,
+                    onProductClick = onProductClick,
+                    onBack = onBack,
+                    onRefresh = { viewModel.loadProducts() },
+                    isRefreshing = state.isRefreshing,
+                    onShowFilterChange = { showFilter ->
+                        viewModel.setFilterVisibility(showFilter)
+                    }
+                )
+            }
+        }
+
+        // Small progress indicator during refresh
+        if (state.isRefreshing) {
+            CircularProgressIndicator(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .align(Alignment.TopCenter)
+                    .padding(12.dp)
+            )
+        }
+
+        // Keep existing products visible if refreshing fails
+        if (state.errorMessage != null && state.products.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = state.errorMessage ?: "",
                     color = MaterialTheme.colorScheme.error
                 )
+
                 Button(onClick = { viewModel.loadProducts() }) {
                     Text("Retry")
                 }
             }
-
-            else -> ProductsList(
-                filteredProducts = state.filteredProducts,
-                onProductClick = onProductClick,
-                onBack = onBack, // Passes the back action down into list header
-                onShowFilterChange = { showFilter ->
-                    viewModel.setFilterVisibility(showFilter)
-                }
-            )
         }
-
         // Modular call to the filter bottom sheet component
         if (state.showFilter) {
             ProductFilterSheet(

@@ -19,6 +19,7 @@ import com.pnc.capstoneprojectandroid.core.CustomerHomeScreen
 import com.pnc.capstoneprojectandroid.ui.orderhistory.OrderHistoryApp
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductDetailsScreen
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductsScreen
+import com.pnc.capstoneprojectandroid.features.products.presentation.composables.SavedProductsScreen
 import com.pnc.capstoneprojectandroid.ui.theme.CapstoneProjectAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -71,6 +72,12 @@ class MainActivity : ComponentActivity() {
                                   onBack = { navController.popBackStack() }
                                 )
                             }
+                        }
+                        composable("saved") {
+                            SavedProductsScreen(
+                                onProductClick = { id -> navController.navigate("products/$id") },
+                                onBack = { navController.popBackStack() }
+                            )
                         }
                     }
                 }

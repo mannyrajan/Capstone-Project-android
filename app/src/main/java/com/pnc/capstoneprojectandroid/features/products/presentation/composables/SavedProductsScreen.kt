@@ -2,6 +2,7 @@ package com.pnc.capstoneprojectandroid.features.products.presentation.composable
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,33 +56,49 @@ fun SavedProductsScreen(
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
+// adding box to handle modifiers for state loading and error
+        Box (modifier = Modifier
+            .fillMaxSize()
+            .weight(1f),
+            contentAlignment = Alignment.Center
+        ){
 
+        }
         when {
+            // loading state
             state.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                )
+                CircularProgressIndicator()
             }
-
+            // error state with retry option
             state.errorMessage != null -> {
-                Text(
-                    text = state.errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Text(
+                        text = state.errorMessage ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Button(onClick = { viewModel.load() }) {
+                        Text("Retry")
+                    }
+                }
             }
 
+            // 3. Empty Saved State
             state.products.isEmpty() -> {
                 Text(
                     text = "No saved products yet",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(24.dp)
                 )
             }
-
+            // Success! Populated list
             else -> {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(state.products, key = { it.id }) { product ->
@@ -107,9 +126,9 @@ fun SavedProductsScreen(
                                 contentDescription = product.name
                             )
                         }
+                        }
                     }
                 }
             }
         }
     }
-}

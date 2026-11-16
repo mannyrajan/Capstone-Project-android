@@ -49,7 +49,8 @@ fun ProductsScreen(
                 ) {
                     Text(
                         text = state.errorMessage ?: "",
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge
                     )
 
                     Button(onClick = { viewModel.loadProducts() }) {
@@ -68,13 +69,14 @@ fun ProductsScreen(
                     isRefreshing = state.isRefreshing,
                     onShowFilterChange = { showFilter ->
                         viewModel.setFilterVisibility(showFilter)
-                    }
+                    },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
 
         // Small progress indicator during refresh
-        if (state.isRefreshing) {
+        if (state.isRefreshing && state.products.isNotEmpty()) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.TopCenter)

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,8 +41,10 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
@@ -152,7 +155,7 @@ fun ProductsList(
                             style = typography.headlineLarge,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
-                            // removed due to it pushing the button of the screen
+                            // removed due to it pushing the button off the screen
 //                    modifier = Modifier
 //                        .fillMaxWidth()
 //                        .padding(vertical = 16.dp)
@@ -203,7 +206,6 @@ fun ProductsList(
                 shape = RoundedCornerShape(8.dp)
             )
 
-
             ProductsListBody(
                 products = displayedProducts,
                 searchQuery = searchQuery,
@@ -211,8 +213,12 @@ fun ProductsList(
                 listState = listState,
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.fillMaxSize()
             )
+
+
+
+
 
         } // end of Column
 
@@ -226,7 +232,7 @@ private fun ProductsListBody(
     products: List<Products>,
     searchQuery: String, // New parameter for search
     onProductClick: (Int) -> Unit,
-    listState: androidx.compose.foundation.lazy.LazyListState,
+    listState: LazyListState,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
@@ -236,32 +242,51 @@ private fun ProductsListBody(
         onRefresh = onRefresh,
         modifier = modifier
     ) {
-        Box(modifier = modifier) {
-            if (products.isEmpty() && searchQuery.isNotBlank()) {
-                // Empty state communication
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No products match \"$searchQuery\"",
-                        style = typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(products, key = { it.id }) { product ->
-                        ProductRow(
-                            product = product,
-                            onClick = { onProductClick(product.id) }
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                // Empty search match state
+                products.isEmpty() && searchQuery.isNotBlank() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No products match \"$searchQuery\"",
+                            style = typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
                         )
-                        HorizontalDivider()
+                    }
+                }
+                // Empty catalog state (if filters narrowed down everything to zero)
+                products.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No products available with current filters.",
+                            style = typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                // Populated list state
+                else -> {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(products, key = { it.id }) { product ->
+                            ProductRow(
+                                product = product,
+                                onClick = { onProductClick(product.id) }
+                            )
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -348,5 +373,4 @@ fun ProductThumbnail(
             )
         }
     }
-
 }

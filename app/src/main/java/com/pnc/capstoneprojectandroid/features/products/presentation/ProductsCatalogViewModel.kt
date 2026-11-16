@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
+import retrofit2.HttpException
+import java.io.IOException
 
 @HiltViewModel
 class ProductsCatalogViewModel @Inject constructor(
@@ -33,17 +35,20 @@ class ProductsCatalogViewModel @Inject constructor(
 
             val hasProducts = _uiState.value.products.isNotEmpty()
 
+            // setting loading state. if we have cached products, trigger a refresh
+            // if the list is empty, trigger a full loading of data
             _uiState.update {
                 it.copy(
                     isLoading = !hasProducts,
                     isRefreshing = hasProducts,
-                    errorMessage = null
+                    errorMessage = null // clear any previous error
                 )
             }
 
             try {
+                // fetch new products
                 val products = repository.refreshProducts()
-
+                // success state
                 _uiState.update {
                     it.copy(
                         products = products,
@@ -54,14 +59,38 @@ class ProductsCatalogViewModel @Inject constructor(
                 }
 
             } catch (e: CancellationException) {
+                // coroutine cancellation
                 throw e
-
-            } catch (e: Exception) {
+            } catch ( e: HttpException) {
+                // connectivity failure
+                val message = if (e.code() in 500..599) {
+                    "Server error: ${e.code()}"
+                } else {
+                    "Request failed: ${e.code()}"
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        errorMessage = e.message ?: "Couldn't load products"
+                        errorMessage = message
+                    )
+                }
+            } catch (e: IOException) {
+                // connectivity failure
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        errorMessage = "Couldn't load products"
+                    )
+                }
+            } catch (e: Exception) {
+                // general safety net/catch all
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        errorMessage = "Something went wrong while processing data. Please try again."
                     )
                 }
             }

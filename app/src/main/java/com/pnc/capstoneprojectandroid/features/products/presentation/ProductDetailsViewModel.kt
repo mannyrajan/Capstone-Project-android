@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.pnc.capstoneprojectandroid.features.products.domain.ProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.domain.RecentlyViewedRepository
 import com.pnc.capstoneprojectandroid.features.products.presentation.state.ProductDetailsState
+import com.pnc.capstoneprojectandroid.features.inventory.data.repository.InventoryRepository
+import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailability
+import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailabilityClassifier
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +23,7 @@ import javax.inject.Inject
 class ProductDetailsViewModel @Inject constructor(
     private val repository: ProductsRepository,
     private val recentlyViewedRepository: RecentlyViewedRepository,
+    private val inventoryRepository: InventoryRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -39,22 +43,46 @@ class ProductDetailsViewModel @Inject constructor(
             }
 
             try {
-                // Load product details first.
                 val product = repository.getProduct(productId)
 
-                // Display the successfully loaded product.
                 _uiState.update {
                     it.copy(product = product, isLoading = false)
                 }
 
-                // Record it in Recently Viewed.
-                // A history-saving failure should not break product details.
+                // Record the product in Recently Viewed.
                 try {
                     recentlyViewedRepository.addRecentlyViewed(product)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
-                    // Keep the successfully loaded product visible.
+                    // Product details should remain visible.
+                }
+
+                // Retrieve and classify inventory separately.
+                try {
+                    val inventory = inventoryRepository.getInventory()
+                    val matchingItem = inventory.firstOrNull {
+                        it.productId == product.id
+                    }
+
+                    val availability = if (matchingItem == null) {
+                        ProductAvailability.UNKNOWN
+                    } else {
+                        ProductAvailabilityClassifier.classify(
+                            quantity = matchingItem.quantity,
+                            reorderPoint = matchingItem.reorderPoint
+                        )
+                    }
+
+                    _uiState.update {
+                        it.copy(availability = availability)
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    _uiState.update {
+                        it.copy(availability = ProductAvailability.UNKNOWN)
+                    }
                 }
 
             } catch (e: CancellationException) {

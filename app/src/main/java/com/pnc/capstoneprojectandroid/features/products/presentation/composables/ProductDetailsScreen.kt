@@ -1,3 +1,4 @@
+
 package com.pnc.capstoneprojectandroid.features.products.presentation.composables
 
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -31,6 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailability
+import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailabilityClassifier
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import com.pnc.capstoneprojectandroid.features.products.presentation.ProductDetailsViewModel
 import java.text.NumberFormat
@@ -46,20 +48,32 @@ fun ProductDetailsScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
-            state.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+            state.isLoading -> CircularProgressIndicator(
+                Modifier.align(Alignment.Center)
+            )
 
             state.errorMessage != null -> Column(
-                modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(state.errorMessage ?: "", color = MaterialTheme.colorScheme.error)
-                Button(onClick = { viewModel.load() }) { Text("Retry") }
-                TextButton(onClick = onBack) { Text("Back") }
+                Text(
+                    state.errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error
+                )
+                Button(onClick = { viewModel.load() }) {
+                    Text("Retry")
+                }
+                TextButton(onClick = onBack) {
+                    Text("Back")
+                }
             }
 
             state.product != null -> ProductDetailsContent(
                 product = state.product!!,
+                availability = state.availability,
                 onBack = onBack
             )
         }
@@ -69,6 +83,7 @@ fun ProductDetailsScreen(
 @Composable
 fun ProductDetailsContent(
     product: Products,
+    availability: ProductAvailability = ProductAvailability.UNKNOWN,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -83,17 +98,21 @@ fun ProductDetailsContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Name, ID and product number up top
             DetailsHeader(name = product.name, onBack = onBack)
+
             Text(
                 text = "ID #${product.id}",
                 style = MaterialTheme.typography.titleMedium
             )
+
             Text(
                 text = "Product number: ${product.productNumber}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            // Availability is displayed as text, not color alone.
+            AvailabilityCard(availability)
 
             if (isWide) {
                 Row(
@@ -101,6 +120,7 @@ fun ProductDetailsContent(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     ProductImageCard(product, Modifier.weight(1f))
+
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -119,14 +139,47 @@ fun ProductDetailsContent(
 }
 
 @Composable
+private fun AvailabilityCard(availability: ProductAvailability) {
+    val label = ProductAvailabilityClassifier.displayLabel(availability)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Product Availability",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
 private fun DetailsHeader(name: String, onBack: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
         IconButton(
             onClick = onBack,
             modifier = Modifier.align(Alignment.CenterStart)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
+            )
         }
+
         Text(
             text = name,
             style = MaterialTheme.typography.headlineSmall,
@@ -139,7 +192,10 @@ private fun DetailsHeader(name: String, onBack: () -> Unit) {
 }
 
 @Composable
-private fun ProductImageCard(product: Products, modifier: Modifier = Modifier) {
+private fun ProductImageCard(
+    product: Products,
+    modifier: Modifier = Modifier
+) {
     Card(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -159,10 +215,18 @@ private fun ProductImageCard(product: Products, modifier: Modifier = Modifier) {
 @Composable
 private fun ProductInfoCard(product: Products) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+        Column(
+            modifier = Modifier.padding(
+                horizontal = 16.dp,
+                vertical = 4.dp
+            )
+        ) {
             DetailRow("Color", product.color.ifBlank { "N/A" })
             HorizontalDivider()
-            DetailRow("Summary", product.summary.ifBlank { "No summary available" })
+            DetailRow(
+                "Summary",
+                product.summary.ifBlank { "No summary available" }
+            )
         }
     }
 }
@@ -183,9 +247,11 @@ private fun ProductPriceCard(product: Products) {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = NumberFormat.getCurrencyInstance(Locale.US).format(product.price),
+                text = NumberFormat.getCurrencyInstance(Locale.US)
+                    .format(product.price),
                 style = MaterialTheme.typography.headlineLarge
             )
+
             Text(
                 text = "Warranty: ${product.warranty.ifBlank { "None" }}",
                 style = MaterialTheme.typography.bodySmall,
@@ -207,6 +273,7 @@ private fun DetailRow(label: String, value: String) {
             text = label,
             style = MaterialTheme.typography.titleSmall
         )
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,

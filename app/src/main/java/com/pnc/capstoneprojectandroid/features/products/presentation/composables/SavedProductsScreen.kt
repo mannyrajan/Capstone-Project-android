@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -29,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pnc.capstoneprojectandroid.features.products.presentation.SavedProductsViewModel
 import java.text.NumberFormat
 import java.util.Locale
+
 
 @Composable
 fun SavedProductsScreen(
@@ -56,18 +59,15 @@ fun SavedProductsScreen(
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
-// adding box to handle modifiers for state loading and error
-        Box (modifier = Modifier
-            .fillMaxSize()
-            .weight(1f),
-            contentAlignment = Alignment.Center
-        ){
-
-        }
         when {
             // loading state
             state.isLoading -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .semantics { contentDescription = "Loading products" }
+                )
             }
             // error state with retry option
             state.errorMessage != null -> {

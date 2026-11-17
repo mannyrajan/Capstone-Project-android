@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.core
 
 import androidx.compose.foundation.clickable
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -22,9 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
@@ -39,91 +40,93 @@ fun CustomerHomeScreen(
     onNavigateToOrders: () -> Unit,
     onProductClick: (Int) -> Unit = {}
 ) {
-    // Grab Hilt ViewModel directly inside the single screen composable
+    // Grab Hilt ViewModel directly inside the screen composable
     val recentlyViewedViewModel: RecentlyViewedViewModel = hiltViewModel()
     val recentlyViewedProducts by recentlyViewedViewModel.recentlyViewedProducts.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        // Header
-        item {
-            Text(
-                text = "Welcome to Adventure Works",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("dashboard-title")
-            )
-        }
-
-        // Product Catalog Button
-        item {
-            Button(
-                onClick = onNavigateToProducts,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("view-product-catalog-button")
-            ) {
-                Text("View Product Catalog")
-            }
-        }
-
-        // Recent Orders Button
-        item {
-            Button(
-                onClick = onNavigateToOrders,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("view-recent-orders-button")
-            ) {
-                Text("View Recent Orders")
-            }
-        }
-
-        // Recently Viewed History Button removed due to incorrect implementation
-
-
-        // Existing Recently Viewed Products Carousel
-        item {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+        LazyColumn(
+            modifier = Modifier
+                .widthIn(max = 840.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header
+            item {
                 Text(
-                    text = "Recently Viewed Products",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "Welcome to Adventure Works",
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dashboard-title")
+                        .semantics { heading() }
                 )
+            }
 
-                if (recentlyViewedProducts.isEmpty()) {
+            // Product Catalog Button
+            item {
+                Button(
+                    onClick = onNavigateToProducts,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("view-product-catalog-button")
+                ) {
+                    Text("View Product Catalog")
+                }
+            }
+
+            // Recent Orders Button
+            item {
+                Button(
+                    onClick = onNavigateToOrders,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("view-recent-orders-button")
+                ) {
+                    Text("View Recent Orders")
+                }
+            }
+
+            // Recently Viewed Products Carousel
+            item {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(
-                        text = "No recently viewed products yet.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "Recently Viewed Products",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() }
                     )
-                } else {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(
-                            items = recentlyViewedProducts,
-                            key = { it.id }
-                        ) { product ->
-                            ProductCard(
-                                product = product,
-                                onClick = { onProductClick(product.id) }
-                            )
+
+                    if (recentlyViewedProducts.isEmpty()) {
+                        Text(
+                            text = "No recently viewed products yet.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(
+                                items = recentlyViewedProducts,
+                                key = { it.id }
+                            ) { product ->
+                                ProductCard(
+                                    product = product,
+                                    onClick = { onProductClick(product.id) }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
-        // Saved product carousel
-
-
     }
 }
 
@@ -134,8 +137,8 @@ fun ProductCard(
 ) {
     Card(
         modifier = Modifier
-            .width(150.dp) // compacting the carousel view
-            .clickable(onClick = onClick),
+            .width(150.dp)
+            .clickable(onClickLabel = "View details", onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -143,7 +146,7 @@ fun ProductCard(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Smaller thumbnail box for the carousel
+            // Thumbnail container for the carousel
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -153,7 +156,7 @@ fun ProductCard(
                 ProductThumbnail(
                     base64 = product.thumbnailBase64,
                     contentDescription = product.name,
-                    size = 90.dp // Reduced from larger size to fit home screen better
+                    size = 90.dp
                 )
             }
 
@@ -163,8 +166,8 @@ fun ProductCard(
             ) {
                 Text(
                     text = product.name,
-                    style = MaterialTheme.typography.bodyMedium, // Tighter typography
-                    maxLines = 1, // Keep to 1 line for uniform card heights
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -183,15 +186,3 @@ fun ProductCard(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun CustomerHomePreview() {
-//    CustomerHomeScreen(
-//        onNavigateToProducts = {},
-//        onNavigateToOrders = {},
-//        onNavigateToRecentlyViewed = {},
-//        recentlyViewedProducts = MockData.sampleRecentlyViewed,
-//        onProductClick = {}
-//    )
-//}

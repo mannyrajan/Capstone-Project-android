@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 fun CustomerHomeScreen(
     onNavigateToProducts: () -> Unit,
     onNavigateToOrders: () -> Unit,
+    onNavigateToRecentlyViewed: () -> Unit = {},
     recentlyViewedProducts: List<Product> = MockData.sampleRecentlyViewed,
     onProductClick: (Int) -> Unit = {}
 ) {
@@ -115,7 +115,7 @@ fun ProductCard(
     Card(
         modifier = Modifier
             .width(160.dp)
-            .clickable(onClickLabel = "View details", onClick = onClick),
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(

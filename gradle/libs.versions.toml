@@ -14,6 +14,7 @@ okhttpVersion = "5.5.0"
 lifecycle = "2.11.0"
 coilVersion = "3.6.3"
 navigationCompose = "2.10.2"
+room = "2.8.5"
 
 
 [libraries]
@@ -44,6 +45,8 @@ androidx-material-icons-core = { group = "androidx.compose.material", name = "ma
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coilVersion" }
 coil-loader = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coilVersion" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [bundles]
 lifecycle = ["androidx-lifecycle-runtime", "androidx-lifecycle-viewmodel"]

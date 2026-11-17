@@ -223,44 +223,68 @@ private fun OrderDetailScreen(
         ) {
             item {
                 Text(order.customerName, style = MaterialTheme.typography.headlineSmall)
-                Text("Customer ${order.customerId}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("Ordered ${formatOrderDate(order.orderDate)}")
                 Text(
-                    if (order.isShipped) "Shipped ${formatOrderDate(order.shipDate)}" else "Not shipped",
+                    "Ordered ${formatOrderDate(order.orderDate)}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = if (order.isShipped) "Shipped ${formatOrderDate(order.shipDate)}" else "Not yet shipped",
+                    color = if (order.isShipped) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
             item {
-                if (state.detailLoading) LinearProgressIndicator(Modifier.fillMaxWidth())
-                state.detailError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                if (state.detailLoading) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
+                state.detailError?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
                 state.shipping?.let { shipping ->
                     Card(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(
+                            Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Text("Shipping", style = MaterialTheme.typography.titleMedium)
-                            Text(shipping.shipMethod ?: "Ship method unavailable")
-                            Text(
-                                shipping.trackingNumber?.takeIf { it.isNotBlank() }
-                                    ?: "No tracking number",
-                            )
-                            val phone = listOfNotNull(shipping.phone, shipping.phoneType?.let { "($it)" })
-                                .joinToString(" ")
-                            if (phone.isNotBlank()) Text(phone)
-                            shipping.email?.let { Text(it) }
-                            Text("Tax ${formatMoney(shipping.tax)}")
-                            Text("Freight ${formatMoney(shipping.freight)}")
+
+                            shipping.shipMethod?.takeIf { it.isNotBlank() }?.let {
+                                Text("Method: $it")
+                            }
+                            shipping.trackingNumber?.takeIf { it.isNotBlank() }?.let {
+                                Text("Tracking: $it")
+                            } ?: Text("Tracking: Not available yet")
+
+                            val phone = listOfNotNull(
+                                shipping.phone?.takeIf { it.isNotBlank() },
+                                shipping.phoneType?.takeIf { it.isNotBlank() }?.let { "($it)" }
+                            ).joinToString(" ")
+                            if (phone.isNotBlank()) Text("Phone: $phone")
+
+                            shipping.email?.takeIf { it.isNotBlank() }?.let {
+                                Text("Email: $it")
+                            }
+
+                            if (shipping.tax > 0) Text("Tax: ${formatMoney(shipping.tax)}")
+                            if (shipping.freight > 0) Text("Freight: ${formatMoney(shipping.freight)}")
                         }
                     }
                 }
             }
+
             item {
                 Text("Items", style = MaterialTheme.typography.titleMedium)
             }
             items(order.lines, key = { it.id }) { line ->
                 LineRow(line)
             }
+
             item {
                 Text(
                     "Items total ${formatMoney(order.itemsTotal)}",
                     style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -270,12 +294,16 @@ private fun OrderDetailScreen(
 @Composable
 private fun LineRow(line: OrderLine) {
     Card(Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column(Modifier.weight(1f)) {
                 Text(line.productName, fontWeight = FontWeight.Medium)
                 Text(
                     "Qty ${line.quantity} · ${formatMoney(line.unitPrice)} each",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -296,4 +324,3 @@ private fun MessageBlock(message: String, actionLabel: String, onAction: () -> U
         Button(onClick = onAction) { Text(actionLabel) }
     }
 }
-

@@ -22,10 +22,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
-import com.pnc.capstoneprojectandroid.features.products.data.ProductsDataSource
-import com.pnc.capstoneprojectandroid.features.products.data.RemoteProductsDataSource
 import com.pnc.capstoneprojectandroid.features.products.domain.RecentlyViewedRepository
-import com.pnc.capstoneprojectandroid.features.products.domain.SavedProductsRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -55,6 +52,16 @@ object NetworkModule {
     @Singleton
     fun provideProductsDataSource(retrofit: Retrofit): ProductsDataSource =
         retrofit.create(RemoteProductsDataSource::class.java)
+
+    @Provides
+    @Singleton
+    fun provideOrderApi(retrofit: Retrofit): OrderApi =
+        retrofit.create(OrderApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideInventoryApi(retrofit: Retrofit): InventoryApi =
+        retrofit.create(InventoryApi::class.java)
 }
 
 @Module
@@ -70,5 +77,16 @@ abstract class RepositoryModule {
     abstract fun bindSavedProductsRepository(
         impl: DefaultSavedProductsRepository
     ): SavedProductsRepository
+    // Binds the domain-layer interface to its concrete data-layer
+    // so Hilt can automatically inject it into ViewModels.
+    @Binds
+    abstract fun bindOrderRepository(
+        impl: DefaultOrderRepository
+    ): OrderRepository
+    // Add this new binding for recently viewed products
+    @Binds
+    abstract fun bindRecentlyViewedRepository(
+        impl: DefaultRecentlyViewedRepository
+    ): RecentlyViewedRepository
 
 }

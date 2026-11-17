@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButtonDefaults.elevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,36 +81,6 @@ fun CustomerHomeScreen(
                 }
             }
 
-            // Summary of recent order activity Button
-            item {
-                Button(
-                    onClick = onNavigateToOrders,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("view-recent-orders-button")
-                ) {
-                    Text("View Recent Orders")
-                }
-            }
-
-            // Recently viewed products carousel
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Recently Viewed Products",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.semantics { heading() }
-                    )
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(recentlyViewedProducts) { product ->
-                            ProductCard(
-                                product = product,
-                                onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
-                            )
-                        }
-
             // Recent Orders Button
             item {
                 Button(
@@ -167,8 +138,6 @@ fun ProductCard(
 ) {
     Card(
         modifier = Modifier
-            .width(160.dp)
-            .clickable(onClick = onClick),
             .width(150.dp)
             .clickable(onClickLabel = "View details", onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

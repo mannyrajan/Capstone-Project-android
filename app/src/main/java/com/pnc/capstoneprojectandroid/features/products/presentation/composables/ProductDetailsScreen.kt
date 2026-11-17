@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailability
+import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailabilityClassifier
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import com.pnc.capstoneprojectandroid.features.products.presentation.ProductDetailsViewModel
 import java.text.NumberFormat

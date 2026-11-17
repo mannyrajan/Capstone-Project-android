@@ -67,8 +67,11 @@ class OrderHistoryViewModel @JvmOverloads constructor(
                 )
             }
             try {
-                val orders = repository.getOrderHistory()
-                _state.update { it.copy(isLoading = false, isRefreshing = false, orders = orders) }
+                val allOrders = repository.getOrderHistory()
+                val noahOrders = allOrders.filter { order ->
+                    order.customerName.equals("Noah A Hall", ignoreCase = true)
+                }
+                _state.update { it.copy(isLoading = false, isRefreshing = false, orders = noahOrders) }
             } catch (error: Exception) {
                 _state.update {
                     it.copy(
@@ -113,4 +116,3 @@ private fun Throwable.toUserMessage(): String = when (this) {
     is HttpException -> "The server returned HTTP ${code()}."
     else -> message?.takeIf { it.isNotBlank() } ?: "Couldn't load orders."
 }
-

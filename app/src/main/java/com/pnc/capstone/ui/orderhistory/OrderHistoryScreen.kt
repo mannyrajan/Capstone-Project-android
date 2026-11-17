@@ -40,13 +40,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
-import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderLine
-import com.pnc.capstoneprojectandroid.features.orders.data.model.formatMoney
-import com.pnc.capstoneprojectandroid.features.orders.data.model.formatOrderDate
-import com.pnc.capstoneprojectandroid.ui.orderhistory.OrderHistoryUiState
-import com.pnc.capstoneprojectandroid.ui.orderhistory.OrderHistoryViewModel
-import com.pnc.capstoneprojectandroid.ui.orderhistory.ShipFilter
+
+import com.pnc.capstoneprojectandroid.features.orders.domain.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderLine
+import com.pnc.capstoneprojectandroid.features.orders.domain.formatMoney
+import com.pnc.capstoneprojectandroid.features.orders.domain.formatOrderDate
+import com.pnc.capstoneprojectandroid.features.orders.presentation.OrderHistoryUiState
+import com.pnc.capstoneprojectandroid.features.orders.presentation.OrderHistoryViewModel
+import com.pnc.capstoneprojectandroid.features.orders.presentation.ShipFilter
+
 
 @Composable
 fun OrderHistoryApp(viewModel: OrderHistoryViewModel = viewModel()) {

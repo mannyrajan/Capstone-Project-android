@@ -2,11 +2,13 @@ package com.pnc.capstoneprojectandroid.core
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -16,8 +18,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
@@ -29,64 +34,72 @@ fun CustomerHomeScreen(
     recentlyViewedProducts: List<Product> = MockData.sampleRecentlyViewed,
     onProductClick: (Int) -> Unit = {}
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        // Header
-        // Header
-        item {
-            Text(
-                text = "Welcome to Adventure Works",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("dashboard-title")
-            )
-        }
-
-        // Product Catalog Button
-        item {
-            Button(
-                onClick = onNavigateToProducts,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("view-product-catalog-button")
-            ) {
-                Text("View Product Catalog")
-            }
-        }
-
-        // Summary of recent order activity Button
-        item {
-            Button(
-                onClick = onNavigateToOrders,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("view-recent-orders-button")
-            ) {
-                Text("View Recent Orders")
-            }
-        }
-
-        // Recently viewed products carousel
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .widthIn(max = 840.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header
+            // Header
+            item {
                 Text(
-                    text = "Recently Viewed Products",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Welcome to Adventure Works",
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dashboard-title")
+                        .semantics { heading() }
                 )
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+            }
+
+            // Product Catalog Button
+            item {
+                Button(
+                    onClick = onNavigateToProducts,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("view-product-catalog-button")
                 ) {
-                    items(recentlyViewedProducts) { product ->
-                        ProductCard(
-                            product = product,
-                            onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
-                        )
+                    Text("View Product Catalog")
+                }
+            }
+
+            // Summary of recent order activity Button
+            item {
+                Button(
+                    onClick = onNavigateToOrders,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("view-recent-orders-button")
+                ) {
+                    Text("View Recent Orders")
+                }
+            }
+
+            // Recently viewed products carousel
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Recently Viewed Products",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() }
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(recentlyViewedProducts) { product ->
+                            ProductCard(
+                                product = product,
+                                onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
+                            )
+                        }
                     }
                 }
             }
@@ -102,7 +115,7 @@ fun ProductCard(
     Card(
         modifier = Modifier
             .width(160.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClickLabel = "View details", onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(

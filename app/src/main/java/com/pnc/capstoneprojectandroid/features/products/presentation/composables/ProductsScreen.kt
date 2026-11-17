@@ -13,6 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,7 +40,9 @@ fun ProductsScreen(
             // Initial loading
             state.isLoading && state.products.isEmpty() -> {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .semantics { contentDescription = "Loading products" }
                 )
             }
 
@@ -49,7 +57,8 @@ fun ProductsScreen(
                 ) {
                     Text(
                         text = state.errorMessage ?: "",
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
                     )
 
                     Button(onClick = { viewModel.loadProducts() }) {
@@ -79,6 +88,7 @@ fun ProductsScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(12.dp)
+                    .semantics { contentDescription = "Refreshing products" }
             )
         }
 
@@ -87,12 +97,17 @@ fun ProductsScreen(
             Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(12.dp),
+                    .padding(12.dp)
+                    .semantics {
+                        isTraversalGroup = true
+                        traversalIndex = -1f
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = state.errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
                 )
 
                 Button(onClick = { viewModel.loadProducts() }) {

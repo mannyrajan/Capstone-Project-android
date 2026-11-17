@@ -27,6 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,14 +51,22 @@ fun ProductDetailsScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
-            state.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+            state.isLoading -> CircularProgressIndicator(
+                Modifier
+                    .align(Alignment.Center)
+                    .semantics { contentDescription = "Loading product details" }
+            )
 
             state.errorMessage != null -> Column(
                 modifier = Modifier.align(Alignment.Center).padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(state.errorMessage ?: "", color = MaterialTheme.colorScheme.error)
+                Text(
+                    state.errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                )
                 Button(onClick = { viewModel.load() }) { Text("Retry") }
                 TextButton(onClick = onBack) { Text("Back") }
             }
@@ -72,11 +85,15 @@ fun ProductDetailsContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
         val isWide = maxWidth >= 600.dp
 
         Column(
             modifier = Modifier
+                .widthIn(max = 840.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -134,6 +151,7 @@ private fun DetailsHeader(name: String, onBack: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(horizontal = 48.dp)
+                .semantics { heading() }
         )
     }
 }
@@ -149,7 +167,7 @@ private fun ProductImageCard(product: Products, modifier: Modifier = Modifier) {
         ) {
             ProductThumbnail(
                 base64 = product.thumbnailBase64,
-                contentDescription = product.name,
+                contentDescription = "Photo of ${product.name}",
                 size = 240.dp
             )
         }
@@ -178,6 +196,7 @@ private fun ProductPriceCard(product: Products) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics(mergeDescendants = true) {}
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -197,11 +216,12 @@ private fun ProductPriceCard(product: Products) {
 
 @Composable
 private fun DetailRow(label: String, value: String) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
             text = label,
@@ -209,9 +229,7 @@ private fun DetailRow(label: String, value: String) {
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f)
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }

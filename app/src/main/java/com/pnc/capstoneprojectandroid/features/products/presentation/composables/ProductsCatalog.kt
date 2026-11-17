@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -26,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import kotlin.let
@@ -56,9 +56,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import coil3.compose.AsyncImage
@@ -78,7 +81,7 @@ fun ProductsList(
     onShowFilterChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     // moving listState and scope so the Scaffold can control the Back-to-Top button action
     val listState = rememberLazyListState()
@@ -119,91 +122,6 @@ fun ProductsList(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Back arrow
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back to Home",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-
-                    // Products title
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Products",
-                            style = typography.headlineLarge,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                            // removed due to it pushing the button of the screen
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 16.dp)
-                        )
-                    }
-
-                    // Refresh and Filter buttons
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = onRefresh) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Refresh Products",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                        // Filter Button
-                        // Refresh and Filter Buttons
-                        IconButton(onClick = { onShowFilterChange(true) }) {
-                            Icon(
-                                imageVector = Icons.Filled.FilterList,
-                                contentDescription = "Show Filter",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Search Bar TextField
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                placeholder = { Text("Search products...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) { // Clears and restores catalog
-                            Icon(Icons.Default.Clear, contentDescription = "Clear Search")
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp)
-            )
-
-
             ProductsListBody(
                 products = displayedProducts,
                 searchQuery = searchQuery,
@@ -211,6 +129,94 @@ fun ProductsList(
                 listState = listState,
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
+                header = {
+                    Column {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Back arrow
+                                IconButton(onClick = onBack) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back to Home",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+
+                                // Products title
+                                Box(
+                                    modifier = Modifier.weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Products",
+                                        style = typography.headlineLarge,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.semantics { heading() }
+                                        // removed due to it pushing the button of the screen
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(vertical = 16.dp)
+                                    )
+                                }
+
+                                // Refresh and Filter buttons
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(onClick = onRefresh) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Refresh,
+                                            contentDescription = "Refresh Products",
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                    // Filter Button
+                                    // Refresh and Filter Buttons
+                                    IconButton(onClick = { onShowFilterChange(true) }) {
+                                        Icon(
+                                            imageVector = Icons.Filled.FilterList,
+                                            contentDescription = "Show Filter",
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Search Bar TextField
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            placeholder = { Text("Search products...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) { // Clears and restores catalog
+                                        Icon(Icons.Default.Clear, contentDescription = "Clear Search")
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                },
                 modifier = Modifier.weight(1f)
             )
 
@@ -229,6 +235,7 @@ private fun ProductsListBody(
     listState: androidx.compose.foundation.lazy.LazyListState,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
+    header: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
     PullToRefreshBox(
@@ -236,26 +243,31 @@ private fun ProductsListBody(
         onRefresh = onRefresh,
         modifier = modifier
     ) {
-        Box(modifier = modifier) {
-            if (products.isEmpty() && searchQuery.isNotBlank()) {
-                // Empty state communication
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No products match \"$searchQuery\"",
-                        style = typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize()
-                ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .widthIn(max = 840.dp)
+                    .fillMaxSize()
+            ) {
+                item { header() }
+                if (products.isEmpty() && searchQuery.isNotBlank()) {
+                    // Empty state communication
+                    item {
+                        Text(
+                            text = "No products match \"$searchQuery\"",
+                            style = typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
+                } else {
                     items(products, key = { it.id }) { product ->
                         ProductRow(
                             product = product,
@@ -277,7 +289,7 @@ private fun ProductRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClickLabel = "View details", onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -285,9 +297,7 @@ private fun ProductRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = product.name,
-                style = typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                style = typography.titleMedium
             )
             Text(
                 text = product.productNumber,
@@ -298,7 +308,7 @@ private fun ProductRow(
 
         ProductThumbnail(
             base64 = product.thumbnailBase64,
-            contentDescription = product.name
+            contentDescription = null
         )
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -311,7 +321,7 @@ private fun ProductRow(
 @Composable
 fun ProductThumbnail(
     base64: String?,
-    contentDescription: String,
+    contentDescription: String?,
     modifier: Modifier = Modifier,
     size: Dp = 56.dp
 ) {

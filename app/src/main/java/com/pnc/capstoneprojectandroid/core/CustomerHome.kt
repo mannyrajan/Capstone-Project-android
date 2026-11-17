@@ -80,6 +80,36 @@ fun CustomerHomeScreen(
                 }
             }
 
+            // Summary of recent order activity Button
+            item {
+                Button(
+                    onClick = onNavigateToOrders,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("view-recent-orders-button")
+                ) {
+                    Text("View Recent Orders")
+                }
+            }
+
+            // Recently viewed products carousel
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Recently Viewed Products",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() }
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(recentlyViewedProducts) { product ->
+                            ProductCard(
+                                product = product,
+                                onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
+                            )
+                        }
+
             // Recent Orders Button
             item {
                 Button(
@@ -137,6 +167,8 @@ fun ProductCard(
 ) {
     Card(
         modifier = Modifier
+            .width(160.dp)
+            .clickable(onClick = onClick),
             .width(150.dp)
             .clickable(onClickLabel = "View details", onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

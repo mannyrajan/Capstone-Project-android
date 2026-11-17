@@ -4,10 +4,14 @@ import com.pnc.capstoneprojectandroid.BuildConfig
 import com.pnc.capstoneprojectandroid.features.orders.data.DefaultOrderRepository
 import com.pnc.capstoneprojectandroid.features.orders.data.OrderApi
 import com.pnc.capstoneprojectandroid.features.orders.domain.OrderRepository
+import com.pnc.capstoneprojectandroid.features.inventory.data.api.InventoryApi
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultRecentlyViewedRepository
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultSavedProductsRepository
+import com.pnc.capstoneprojectandroid.features.products.data.ProductsDataSource
+import com.pnc.capstoneprojectandroid.features.products.data.RemoteProductsDataSource
 import com.pnc.capstoneprojectandroid.features.products.domain.ProductsRepository
+import com.pnc.capstoneprojectandroid.features.products.domain.SavedProductsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -32,7 +36,9 @@ object NetworkModule {
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(
-                HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BASIC
+                }
             )
             .build()
 
@@ -49,11 +55,6 @@ object NetworkModule {
     @Singleton
     fun provideProductsDataSource(retrofit: Retrofit): ProductsDataSource =
         retrofit.create(RemoteProductsDataSource::class.java)
-
-    @Provides
-    @Singleton
-    fun provideOrderApi(retrofit: Retrofit): OrderApi =
-        retrofit.create(OrderApi::class.java)
 }
 
 @Module
@@ -61,22 +62,13 @@ object NetworkModule {
 abstract class RepositoryModule {
 
     @Binds
-    abstract fun bindRepository(impl: DefaultProductsRepository): ProductsRepository
+    abstract fun bindRepository(
+        impl: DefaultProductsRepository
+    ): ProductsRepository
 
     @Binds
     abstract fun bindSavedProductsRepository(
         impl: DefaultSavedProductsRepository
     ): SavedProductsRepository
-    // Binds the domain-layer interface to its concrete data-layer
-    // so Hilt can automatically inject it into ViewModels.
-    @Binds
-    abstract fun bindOrderRepository(
-        impl: DefaultOrderRepository
-    ): OrderRepository
-    // Add this new binding for recently viewed products
-    @Binds
-    abstract fun bindRecentlyViewedRepository(
-        impl: DefaultRecentlyViewedRepository
-    ): RecentlyViewedRepository
 
 }

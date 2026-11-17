@@ -1,3 +1,4 @@
+
 package com.pnc.capstoneprojectandroid.core
 
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 fun CustomerHomeScreen(
     onNavigateToProducts: () -> Unit,
     onNavigateToOrders: () -> Unit,
+    onNavigateToRecentlyViewed: () -> Unit = {},
     recentlyViewedProducts: List<Product> = MockData.sampleRecentlyViewed,
     onProductClick: (Int) -> Unit = {}
 ) {
@@ -35,7 +37,6 @@ fun CustomerHomeScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
         // Header
         item {
             Text(
@@ -60,7 +61,7 @@ fun CustomerHomeScreen(
             }
         }
 
-        // Summary of recent order activity Button
+        // Recent Orders Button
         item {
             Button(
                 onClick = onNavigateToOrders,
@@ -72,20 +73,39 @@ fun CustomerHomeScreen(
             }
         }
 
-        // Recently viewed products carousel
+        // Recently Viewed History Button
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onNavigateToRecentlyViewed,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("view-recently-viewed-button")
+            ) {
+                Text("View Recently Viewed Products")
+            }
+        }
+
+        // Existing Recently Viewed Products Carousel
+        item {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = "Recently Viewed Products",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium
                 )
+
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(recentlyViewedProducts) { product ->
                         ProductCard(
                             product = product,
-                            onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
+                            onClick = {
+                                onProductClick(
+                                    product.id.toIntOrNull() ?: 0
+                                )
+                            }
                         )
                     }
                 }
@@ -113,10 +133,12 @@ fun ProductCard(
                 text = product.name,
                 style = MaterialTheme.typography.titleMedium
             )
+
             Text(
                 text = product.price,
                 style = MaterialTheme.typography.bodyMedium
             )
+
             Text(
                 text = product.stockStatus,
                 style = MaterialTheme.typography.bodySmall
@@ -131,6 +153,7 @@ fun CustomerHomePreview() {
     CustomerHomeScreen(
         onNavigateToProducts = {},
         onNavigateToOrders = {},
+        onNavigateToRecentlyViewed = {},
         recentlyViewedProducts = MockData.sampleRecentlyViewed,
         onProductClick = {}
     )

@@ -22,7 +22,6 @@ import com.pnc.capstoneprojectandroid.features.products.presentation.composables
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.SavedProductsScreen
 import com.pnc.capstoneprojectandroid.ui.theme.CapstoneProjectAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.pnc.capstoneprojectandroid.features.products.presentation.composables.RecentlyViewedScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,25 +44,14 @@ class MainActivity : ComponentActivity() {
                                     CustomerHomeScreen(
                                         onNavigateToProducts = { navController.navigate("products") },
                                         onNavigateToOrders = { navController.navigate("order_history") },
-                                        onNavigateToRecentlyViewed = {
-                                            navController.navigate("recently_viewed")
-                                        },
+                                        // removed onNavigateToRecentlyViewed callback since it's moved to carousel
                                         onProductClick = { productId ->
                                             navController.navigate("products/$productId")
                                         }
                                     )
                                 }
                             }
-                            composable(route = "recently_viewed") {
-                                RecentlyViewedScreen(
-                                    onProductClick = { id ->
-                                        navController.navigate("products/$id")
-                                    },
-                                    onBack = {
-                                        navController.popBackStack()
-                                    }
-                                )
-                            }
+                            // removed recently viewed screen composable since it's moved to carousel
                             composable("products") {
                                 ProductsScreen(
                                     onProductClick = { productId ->

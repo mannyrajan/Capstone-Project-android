@@ -38,13 +38,4 @@ object DatabaseModule {
     }
 }
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class RecentlyViewedRepositoryModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindRecentlyViewedRepository(
-        implementation: DefaultRecentlyViewedRepository
-    ): RecentlyViewedRepository
-}
+// moved this binding to the NetworkModule

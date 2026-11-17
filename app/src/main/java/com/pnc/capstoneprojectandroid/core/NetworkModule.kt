@@ -1,6 +1,9 @@
 package com.pnc.capstoneprojectandroid.core
 
 import com.pnc.capstoneprojectandroid.BuildConfig
+import com.pnc.capstoneprojectandroid.features.orders.data.DefaultOrderRepository
+import com.pnc.capstoneprojectandroid.features.orders.data.OrderApi
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderRepository
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultSavedProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.domain.ProductsRepository
@@ -44,6 +47,11 @@ object NetworkModule {
     @Singleton
     fun provideProductsDataSource(retrofit: Retrofit): ProductsDataSource =
         retrofit.create(RemoteProductsDataSource::class.java)
+
+    @Provides
+    @Singleton
+    fun provideOrderApi(retrofit: Retrofit): OrderApi =
+        retrofit.create(OrderApi::class.java)
 }
 
 @Module
@@ -57,5 +65,10 @@ abstract class RepositoryModule {
     abstract fun bindSavedProductsRepository(
         impl: DefaultSavedProductsRepository
     ): SavedProductsRepository
-
+    // Binds the domain-layer interface to its concrete data-layer
+    // so Hilt can automatically inject it into ViewModels.
+    @Binds
+    abstract fun bindOrderRepository(
+        impl: DefaultOrderRepository
+    ): OrderRepository
 }

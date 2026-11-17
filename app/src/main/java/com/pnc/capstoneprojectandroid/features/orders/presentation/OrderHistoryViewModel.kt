@@ -1,11 +1,11 @@
-package com.pnc.capstoneprojectandroid.ui.orderhistory
+package com.pnc.capstoneprojectandroid.features.orders.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pnc.capstoneprojectandroid.features.orders.data.api.OrderApiFactory
-import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
-import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderShipping
-import com.pnc.capstoneprojectandroid.features.orders.data.repository.OrderRepository
+import com.pnc.capstoneprojectandroid.features.orders.domain.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderRepository
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderShipping
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
+import javax.inject.Inject
 
 enum class ShipFilter { All, Shipped, Open }
 
@@ -46,8 +47,9 @@ data class OrderHistoryUiState(
         }
 }
 
-class OrderHistoryViewModel @JvmOverloads constructor(
-    private val repository: OrderRepository = OrderRepository(OrderApiFactory.create()),
+@HiltViewModel
+class OrderHistoryViewModel @Inject constructor(
+    private val repository: OrderRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OrderHistoryUiState())
@@ -113,4 +115,3 @@ private fun Throwable.toUserMessage(): String = when (this) {
     is HttpException -> "The server returned HTTP ${code()}."
     else -> message?.takeIf { it.isNotBlank() } ?: "Couldn't load orders."
 }
-

@@ -1,4 +1,4 @@
-package com.pnc.capstoneprojectandroid.ui.orderhistory
+package com.pnc.capstoneprojectandroid.features.orders.presentation.composables
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -40,15 +40,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
-import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderLine
-import com.pnc.capstoneprojectandroid.features.orders.data.model.formatMoney
-import com.pnc.capstoneprojectandroid.features.orders.data.model.formatOrderDate
+import com.pnc.capstoneprojectandroid.features.orders.domain.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderLine
+import com.pnc.capstoneprojectandroid.features.orders.domain.formatMoney
+import com.pnc.capstoneprojectandroid.features.orders.domain.formatOrderDate
+import com.pnc.capstoneprojectandroid.features.orders.presentation.OrderHistoryUiState
+import com.pnc.capstoneprojectandroid.features.orders.presentation.OrderHistoryViewModel
+import com.pnc.capstoneprojectandroid.features.orders.presentation.ShipFilter
 
 @Composable
 fun OrderHistoryApp(
-    viewModel: OrderHistoryViewModel = viewModel(),
+    viewModel: OrderHistoryViewModel = hiltViewModel(), // injecting the viewmodel via hilt
     onBack: () -> Unit // adding callback to go back to customer home page
 ) {
     val state by viewModel.state.collectAsState()

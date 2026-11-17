@@ -16,7 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pnc.capstoneprojectandroid.core.CustomerHomeScreen
-import com.pnc.capstoneprojectandroid.ui.orderhistory.OrderHistoryApp
+import com.pnc.capstoneprojectandroid.features.orders.presentation.composables.OrderHistoryApp
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductDetailsScreen
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductsScreen
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.SavedProductsScreen

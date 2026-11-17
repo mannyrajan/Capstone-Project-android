@@ -1,14 +1,20 @@
-package com.pnc.capstoneprojectandroid.features.orders.data.repository
+package com.pnc.capstoneprojectandroid.features.orders.data
 
-import com.pnc.capstoneprojectandroid.features.orders.data.api.OrderApi
-import com.pnc.capstoneprojectandroid.features.orders.data.model.CustomerOrder
-import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderLine
-import com.pnc.capstoneprojectandroid.features.orders.data.model.OrderShipping
-import com.pnc.capstoneprojectandroid.features.orders.data.model.personName
+import com.pnc.capstoneprojectandroid.features.orders.domain.CustomerOrder
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderLine
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderRepository
+import com.pnc.capstoneprojectandroid.features.orders.domain.OrderShipping
+import com.pnc.capstoneprojectandroid.features.orders.domain.personName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class OrderRepository(private val api: OrderApi) {
-    suspend fun getOrderHistory(): List<CustomerOrder> {
-        return api.getCustomerOrders()
+class DefaultOrderRepository @Inject constructor(
+    private val api: OrderApi
+) : OrderRepository {
+    override suspend fun getOrderHistory(): List<CustomerOrder> = withContext(Dispatchers.IO) {
+        // calls run off the main thread
+        api.getCustomerOrders()
             .groupBy { it.orderNumber }
             .map { (orderNumber, rows) ->
                 val first = rows.first()
@@ -41,9 +47,10 @@ class OrderRepository(private val api: OrderApi) {
             )
     }
 
-    suspend fun getShipping(lineId: Int): OrderShipping {
+    override suspend fun getShipping(lineId: Int): OrderShipping = withContext(Dispatchers.IO){
+        // Offloading individual line detail fetches to Dispatchers.IO to maintain thread safety
         val detail = api.getCustomerOrder(lineId)
-        return OrderShipping(
+        OrderShipping(
             email = detail.emailAddress,
             phone = detail.phoneNumber,
             phoneType = detail.phoneNumberType,
@@ -54,4 +61,3 @@ class OrderRepository(private val api: OrderApi) {
         )
     }
 }
-

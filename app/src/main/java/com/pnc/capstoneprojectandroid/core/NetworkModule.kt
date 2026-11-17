@@ -5,6 +5,7 @@ import com.pnc.capstoneprojectandroid.features.orders.data.DefaultOrderRepositor
 import com.pnc.capstoneprojectandroid.features.orders.data.OrderApi
 import com.pnc.capstoneprojectandroid.features.orders.domain.OrderRepository
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultProductsRepository
+import com.pnc.capstoneprojectandroid.features.products.data.DefaultRecentlyViewedRepository
 import com.pnc.capstoneprojectandroid.features.products.data.DefaultSavedProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.domain.ProductsRepository
 import dagger.Binds
@@ -19,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 import com.pnc.capstoneprojectandroid.features.products.data.ProductsDataSource
 import com.pnc.capstoneprojectandroid.features.products.data.RemoteProductsDataSource
+import com.pnc.capstoneprojectandroid.features.products.domain.RecentlyViewedRepository
 import com.pnc.capstoneprojectandroid.features.products.domain.SavedProductsRepository
 
 @Module
@@ -71,4 +73,10 @@ abstract class RepositoryModule {
     abstract fun bindOrderRepository(
         impl: DefaultOrderRepository
     ): OrderRepository
+    // Add this new binding for recently viewed products
+    @Binds
+    abstract fun bindRecentlyViewedRepository(
+        impl: DefaultRecentlyViewedRepository
+    ): RecentlyViewedRepository
+
 }

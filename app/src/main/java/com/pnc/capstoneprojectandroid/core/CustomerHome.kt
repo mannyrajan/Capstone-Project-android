@@ -1,7 +1,9 @@
+
 package com.pnc.capstoneprojectandroid.core
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,26 +18,37 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pnc.capstoneprojectandroid.features.products.domain.Products
+import com.pnc.capstoneprojectandroid.features.products.presentation.RecentlyViewedViewModel
+import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductThumbnail
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun CustomerHomeScreen(
     onNavigateToProducts: () -> Unit,
     onNavigateToOrders: () -> Unit,
-    recentlyViewedProducts: List<Product> = MockData.sampleRecentlyViewed,
     onProductClick: (Int) -> Unit = {}
 ) {
+    // Grab Hilt ViewModel directly inside the single screen composable
+    val recentlyViewedViewModel: RecentlyViewedViewModel = hiltViewModel()
+    val recentlyViewedProducts by recentlyViewedViewModel.recentlyViewedProducts.collectAsStateWithLifecycle()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
         // Header
         item {
             Text(
@@ -60,7 +73,7 @@ fun CustomerHomeScreen(
             }
         }
 
-        // Summary of recent order activity Button
+        // Recent Orders Button
         item {
             Button(
                 onClick = onNavigateToOrders,
@@ -72,21 +85,38 @@ fun CustomerHomeScreen(
             }
         }
 
-        // Recently viewed products carousel
+        // Recently Viewed History Button removed due to incorrect implementation
+
+
+        // Existing Recently Viewed Products Carousel
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = "Recently Viewed Products",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium
                 )
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(recentlyViewedProducts) { product ->
-                        ProductCard(
-                            product = product,
-                            onClick = { onProductClick(product.id.toIntOrNull() ?: 0) }
-                        )
+
+                if (recentlyViewedProducts.isEmpty()) {
+                    Text(
+                        text = "No recently viewed products yet.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = recentlyViewedProducts,
+                            key = { it.id }
+                        ) { product ->
+                            ProductCard(
+                                product = product,
+                                onClick = { onProductClick(product.id) }
+                            )
+                        }
                     }
                 }
             }
@@ -99,42 +129,69 @@ fun CustomerHomeScreen(
 
 @Composable
 fun ProductCard(
-    product: Product,
+    product: Products,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
-            .width(160.dp)
+            .width(150.dp) // compacting the carousel view
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = product.name,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = product.price,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = product.stockStatus,
-                style = MaterialTheme.typography.bodySmall
-            )
+            // Smaller thumbnail box for the carousel
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                ProductThumbnail(
+                    base64 = product.thumbnailBase64,
+                    contentDescription = product.name,
+                    size = 90.dp // Reduced from larger size to fit home screen better
+                )
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = product.name,
+                    style = MaterialTheme.typography.bodyMedium, // Tighter typography
+                    maxLines = 1, // Keep to 1 line for uniform card heights
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = NumberFormat.getCurrencyInstance(Locale.US).format(product.price),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = product.productNumber,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun CustomerHomePreview() {
-    CustomerHomeScreen(
-        onNavigateToProducts = {},
-        onNavigateToOrders = {},
-        recentlyViewedProducts = MockData.sampleRecentlyViewed,
-        onProductClick = {}
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun CustomerHomePreview() {
+//    CustomerHomeScreen(
+//        onNavigateToProducts = {},
+//        onNavigateToOrders = {},
+//        onNavigateToRecentlyViewed = {},
+//        recentlyViewedProducts = MockData.sampleRecentlyViewed,
+//        onProductClick = {}
+//    )
+//}

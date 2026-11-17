@@ -44,12 +44,14 @@ class MainActivity : ComponentActivity() {
                                     CustomerHomeScreen(
                                         onNavigateToProducts = { navController.navigate("products") },
                                         onNavigateToOrders = { navController.navigate("order_history") },
+                                        // removed onNavigateToRecentlyViewed callback since it's moved to carousel
                                         onProductClick = { productId ->
                                             navController.navigate("products/$productId")
                                         }
                                     )
                                 }
                             }
+                            // removed recently viewed screen composable since it's moved to carousel
                             composable("products") {
                                 ProductsScreen(
                                     onProductClick = { productId ->

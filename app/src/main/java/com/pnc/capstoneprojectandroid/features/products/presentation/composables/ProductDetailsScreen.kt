@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailability
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import com.pnc.capstoneprojectandroid.features.products.presentation.ProductDetailsViewModel
 import java.text.NumberFormat
@@ -265,6 +266,7 @@ private fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -274,9 +276,7 @@ private fun DetailRow(label: String, value: String) {
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f)
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }

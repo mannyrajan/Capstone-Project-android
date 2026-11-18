@@ -1,12 +1,9 @@
-
 package com.pnc.capstoneprojectandroid.core
 
 import android.content.Context
 import androidx.room.Room
 import com.pnc.capstoneprojectandroid.features.products.data.RecentlyViewedDao
-import com.pnc.capstoneprojectandroid.features.products.data.DefaultRecentlyViewedRepository
-import com.pnc.capstoneprojectandroid.features.products.domain.RecentlyViewedRepository
-import dagger.Binds
+import com.pnc.capstoneprojectandroid.features.products.data.SavedProductsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +24,8 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "adventureworks_database"
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -36,6 +34,11 @@ object DatabaseModule {
     ): RecentlyViewedDao {
         return database.recentlyViewedDao()
     }
-}
 
-// moved this binding to the NetworkModule
+    @Provides
+    fun provideSavedProductsDao(
+        database: AppDatabase
+    ): SavedProductsDao {
+        return database.savedProductsDao()
+    }
+}

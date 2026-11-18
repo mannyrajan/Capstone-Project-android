@@ -16,8 +16,13 @@ class DefaultOrderRepository @Inject constructor(
         // calls run off the main thread
         api.getCustomerOrders()
             .groupBy { it.orderNumber }
-            .map { (orderNumber, rows) ->
+            .map{(orderNumber, rows) ->
                 val first = rows.first()
+                // REQUIREMENT 12 TEST HOOK: Uncomment below to force order #75121 to status 99
+                // and verify the "Unknown Status" classifier fallback on screen.
+//                val isTestOrder = orderNumber == 75121
+//                val testStatus = if (isTestOrder) 99 else first.status
+//                val testStatusName = if (isTestOrder) "Unknown_code" else first.statusName
                 CustomerOrder(
                     orderNumber = orderNumber,
                     customerId = first.customerId,
@@ -29,6 +34,9 @@ class DefaultOrderRepository @Inject constructor(
                     ),
                     orderDate = first.orderDate,
                     shipDate = first.shipDate,
+                    // use testStatus and testStatusName when testing fallback
+                    status = first.status, // passed from api response
+                    statusName = first.statusName,
                     representativeLineId = first.id,
                     lines = rows.map { row ->
                         OrderLine(

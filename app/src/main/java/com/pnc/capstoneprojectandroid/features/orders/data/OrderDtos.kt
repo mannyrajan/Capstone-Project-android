@@ -15,6 +15,8 @@ data class CustomerOrderLineDto(
     val suffix: String?,
     val orderDate: String?,
     val shipDate: String?,
+    val status: Int,
+    val statusName: String?,
     val productName: String?,
     val orderNumber: Int,
     val orderQty: Int,

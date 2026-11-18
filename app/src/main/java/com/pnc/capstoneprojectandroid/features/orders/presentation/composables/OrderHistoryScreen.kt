@@ -206,7 +206,7 @@ private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
                 )
                 AssistChip(
                     onClick = {},
-                    label = { Text(if (order.isShipped) "Shipped" else "Open") },
+                    label = { Text(order.customerFacingStatus) }, // Uses translated status & fallback
                 )
             }
             Text(order.customerName, style = MaterialTheme.typography.bodyLarge)
@@ -260,8 +260,12 @@ private fun OrderDetailScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = if (order.isShipped) "Shipped ${formatOrderDate(order.shipDate)}" else "Not yet shipped",
-                    color = if (order.isShipped) MaterialTheme.colorScheme.primary
+                    text = if (order.customerFacingStatus == "Shipped" && !order.shipDate.isNullOrBlank()) {
+                        "Shipped ${formatOrderDate(order.shipDate)}"
+                    } else {
+                        order.customerFacingStatus
+                    },
+                    color = if (order.customerFacingStatus == "Shipped") MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

@@ -204,7 +204,7 @@ fun ProductsList(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 4.dp),
-                            placeholder = { Text("Search products...") },
+                            placeholder = { Text("Search products by name or number") },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Search,

@@ -318,7 +318,7 @@ private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
             )
             .semantics(mergeDescendants = true) {
                 contentDescription = "Order ${order.orderNumber}, ${order.customerName}, " +
-                        "${if (order.isShipped) "Shipped" else "Open"}, " +
+                        "${order.customerFacingStatus}, " +
                         "${order.itemCount} items, " +
                         "total ${formatMoney(order.itemsTotal)}"
             }
@@ -333,7 +333,7 @@ private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
                 )
                 AssistChip(
                     onClick = {},
-                    label = { Text(if (order.isShipped) "Shipped" else "Open") },
+                    label = { Text(order.customerFacingStatus) },
                 )
             }
             Text(order.customerName, style = MaterialTheme.typography.bodyLarge)
@@ -356,7 +356,6 @@ private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OrderDetailScreen(

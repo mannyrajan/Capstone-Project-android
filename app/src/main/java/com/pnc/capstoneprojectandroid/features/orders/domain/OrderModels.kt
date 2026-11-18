@@ -18,12 +18,18 @@ data class CustomerOrder(
     val customerName: String,
     val orderDate: String?,
     val shipDate: String?,
+    val status: Int, // added from api schema, status code for the order
+    val statusName: String?, // added from api schema, name of the status
     val representativeLineId: Int,
     val lines: List<OrderLine>,
 ) {
     val itemsTotal: Double get() = lines.sumOf { it.lineTotal }
     val itemCount: Int get() = lines.sumOf { it.quantity }
     val isShipped: Boolean get() = !shipDate.isNullOrBlank()
+
+    // customer facing status string adhering to requirement 12
+    val customerFacingStatus: String
+        get() = OrderStatusClassifier.displayLabelFor(status, statusName)
 }
 
 data class OrderShipping(
@@ -35,6 +41,48 @@ data class OrderShipping(
     val freight: Double,
     val tax: Double,
 )
+
+// status classifier and fallback
+enum class OrderStatus {
+    PROCESSING,
+    SHIPPED,
+    DELIVERED,
+    CANCELLED,
+    UNKNOWN,
+}
+
+object OrderStatusClassifier {
+    fun classify(statusCode: Int?, statusName: String?): OrderStatus {
+        // check numeric status code first
+        when (statusCode) {
+            1,2 -> return OrderStatus.PROCESSING
+            5 -> return OrderStatus.SHIPPED
+            6 -> return OrderStatus.DELIVERED
+            7 -> return OrderStatus.CANCELLED
+        }
+        // fallback to status name
+        return when (statusName?.trim()?.uppercase()) {
+            "PROCESSING", "PENDING", "OPEN" -> OrderStatus.PROCESSING
+            "SHIPPED" -> OrderStatus.SHIPPED
+            "DELIVERED" -> OrderStatus.DELIVERED
+            "CANCELLED", "CANC" -> OrderStatus.CANCELLED
+            else -> OrderStatus.UNKNOWN // safe fall back
+    }
+}
+    fun displayLabel(status: OrderStatus): String {
+        return when (status) {
+            OrderStatus.PROCESSING -> "Processing"
+            OrderStatus.SHIPPED -> "Shipped"
+            OrderStatus.DELIVERED -> "Delivered"
+            OrderStatus.CANCELLED -> "Cancelled"
+            OrderStatus.UNKNOWN -> "Unknown Status"
+        }
+    }
+    fun displayLabelFor(statusCode: Int?, statusName: String?): String {
+        return displayLabel(classify(statusCode, statusName))
+    }
+}
+
 
 fun personName(first: String?, middle: String?, last: String?, suffix: String?): String {
     return listOf(first, middle, last, suffix)

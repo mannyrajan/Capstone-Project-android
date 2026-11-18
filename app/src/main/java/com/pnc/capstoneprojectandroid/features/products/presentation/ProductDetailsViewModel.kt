@@ -9,6 +9,7 @@ import com.pnc.capstoneprojectandroid.features.products.presentation.state.Produ
 import com.pnc.capstoneprojectandroid.features.inventory.data.repository.InventoryRepository
 import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailability
 import com.pnc.capstoneprojectandroid.features.inventory.domain.ProductAvailabilityClassifier
+import com.pnc.capstoneprojectandroid.features.products.domain.SavedProductsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,7 @@ class ProductDetailsViewModel @Inject constructor(
     private val repository: ProductsRepository,
     private val recentlyViewedRepository: RecentlyViewedRepository,
     private val inventoryRepository: InventoryRepository,
+    private val savedProductsRepository: SavedProductsRepository, // <-- Injecting saved products
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -35,6 +37,22 @@ class ProductDetailsViewModel @Inject constructor(
 
     init {
         load()
+        observeSavedStatus()
+    }
+
+    private fun observeSavedStatus() {
+        viewModelScope.launch {
+            savedProductsRepository.observeSavedIds().collect { savedIds ->
+                _uiState.update { it.copy(isSaved = productId in savedIds) }
+            }
+        }
+    }
+
+    fun toggleSaved() {
+        val currentProduct = _uiState.value.product ?: return
+        viewModelScope.launch {
+            savedProductsRepository.toggleSaved(currentProduct)
+        }
     }
 
     fun load() {

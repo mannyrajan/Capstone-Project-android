@@ -7,5 +7,6 @@ data class ProductDetailsState(
     val product: Products? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val availability: ProductAvailability = ProductAvailability.UNKNOWN
+    val availability: ProductAvailability = ProductAvailability.UNKNOWN,
+    val isSaved: Boolean = false // added for saved products
 )

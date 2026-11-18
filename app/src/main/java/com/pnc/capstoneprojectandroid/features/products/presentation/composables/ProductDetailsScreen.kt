@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -96,6 +98,8 @@ fun ProductDetailsScreen(
             state.product != null -> ProductDetailsContent(
                 product = state.product!!,
                 availability = state.availability,
+                isSaved = state.isSaved, // passing state here
+                onToggleSave = { viewModel.toggleSaved() }, // passing action here
                 onBack = onBack
             )
         }
@@ -106,6 +110,8 @@ fun ProductDetailsScreen(
 fun ProductDetailsContent(
     product: Products,
     availability: ProductAvailability = ProductAvailability.UNKNOWN,
+    isSaved: Boolean, // added for saved products
+    onToggleSave: () -> Unit, // added for saved products
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -124,7 +130,12 @@ fun ProductDetailsContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            DetailsHeader(name = product.name, onBack = onBack)
+            DetailsHeader(
+                name = product.name,
+                isSaved = isSaved,
+                onToggleSave = onToggleSave,
+                onBack = onBack
+            )
             Text(
                 text = "Product number: ${product.productNumber}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -187,7 +198,12 @@ private fun AvailabilityCard(availability: ProductAvailability) {
 }
 
 @Composable
-private fun DetailsHeader(name: String, onBack: () -> Unit) {
+private fun DetailsHeader(
+    name: String,
+    isSaved: Boolean,
+    onToggleSave: () -> Unit,
+    onBack: () -> Unit
+) {
     Box(modifier = Modifier.fillMaxWidth()) {
         IconButton(
             onClick = onBack,
@@ -207,6 +223,16 @@ private fun DetailsHeader(name: String, onBack: () -> Unit) {
                 .padding(horizontal = 48.dp)
                 .semantics { heading() }
         )
+        IconButton(
+            onClick = onToggleSave,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Icon(
+                imageVector = if (isSaved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                contentDescription = if (isSaved) "Remove from saved products" else "Save product",
+                tint = if (isSaved) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

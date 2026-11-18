@@ -4,10 +4,7 @@ package com.pnc.capstoneprojectandroid.core
 import android.content.Context
 import androidx.room.Room
 import com.pnc.capstoneprojectandroid.features.products.data.RecentlyViewedDao
-import com.pnc.capstoneprojectandroid.features.products.data.DefaultRecentlyViewedRepository
-import com.pnc.capstoneprojectandroid.features.products.data.SavedProductDao
-import com.pnc.capstoneprojectandroid.features.products.domain.RecentlyViewedRepository
-import dagger.Binds
+import com.pnc.capstoneprojectandroid.features.products.data.SavedProductsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,10 +39,10 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideSavedProductDao(
+    fun provideSavedProductsDao(
         database: AppDatabase
-    ): SavedProductDao {
-        return database.savedProductDao()
+    ): SavedProductsDao {
+        return database.savedProductsDao()
     }
 }
 

@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButtonDefaults.elevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,6 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import com.pnc.capstoneprojectandroid.features.products.presentation.RecentlyViewedViewModel
+import com.pnc.capstoneprojectandroid.features.products.presentation.SavedProductsViewModel
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductThumbnail
 import java.text.NumberFormat
 import java.util.Locale
@@ -51,12 +51,15 @@ import androidx.compose.foundation.layout.heightIn
 fun CustomerHomeScreen(
     onNavigateToProducts: () -> Unit,
     onNavigateToOrders: () -> Unit,
-    onProductClick: (Int) -> Unit = {}
+    onProductClick: (Int) -> Unit = {},
+    onNavigateToSaved: () -> Unit = {}
 ) {
-    // Grab Hilt ViewModel directly inside the screen composable
     val recentlyViewedViewModel: RecentlyViewedViewModel = hiltViewModel()
     val recentlyViewedProducts by recentlyViewedViewModel.recentlyViewedProducts.collectAsStateWithLifecycle()
     val clearError by recentlyViewedViewModel.errorMessage.collectAsStateWithLifecycle()
+
+    val savedViewModel: SavedProductsViewModel = hiltViewModel()
+    val savedState by savedViewModel.uiState.collectAsStateWithLifecycle()
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -192,10 +195,68 @@ fun CustomerHomeScreen(
                     }
                 }
             }
+
+            // Saved Products Carousel
+            item {
+                SavedProductsCarousel(
+                    products = savedState.products,
+                    onProductClick = onProductClick,
+                    onViewAll = onNavigateToSaved
+                )
+            }
         }
     }
 }
 
+@Composable
+fun SavedProductsCarousel(
+    products: List<Products>,
+    onProductClick: (Int) -> Unit,
+    onViewAll: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Saved Products",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { heading() }
+            )
+            if (products.isNotEmpty()) {
+                TextButton(onClick = onViewAll) {
+                    Text("View all")
+                }
+            }
+        }
+
+        if (products.isEmpty()) {
+            Text(
+                text = "No saved products yet.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(products, key = { it.id }) { product ->
+                    ProductCard(
+                        product = product,
+                        onClick = { onProductClick(product.id) }
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun ProductCard(
@@ -213,7 +274,6 @@ fun ProductCard(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Thumbnail container for the carousel
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -253,5 +313,3 @@ fun ProductCard(
         }
     }
 }
-
-

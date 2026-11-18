@@ -33,7 +33,8 @@ class DefaultOrderRepository @Inject constructor(
                     lines = rows.map { row ->
                         OrderLine(
                             id = row.id,
-                            productName = row.productName?.takeIf { it.isNotBlank() } ?: "Product",
+                            productName = row.productName?.takeIf { it.isNotBlank() }
+                                ?: "Item name unavailable",
                             quantity = row.orderQty,
                             unitPrice = row.unitPrice,
                             lineTotal = row.lineTotal,
@@ -47,7 +48,7 @@ class DefaultOrderRepository @Inject constructor(
             )
     }
 
-    override suspend fun getShipping(lineId: Int): OrderShipping = withContext(Dispatchers.IO){
+    override suspend fun getShipping(lineId: Int): OrderShipping = withContext(Dispatchers.IO) {
         // Offloading individual line detail fetches to Dispatchers.IO to maintain thread safety
         val detail = api.getCustomerOrder(lineId)
         OrderShipping(

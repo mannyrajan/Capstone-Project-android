@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.features.inventory.data.model
 
 import androidx.annotation.Keep

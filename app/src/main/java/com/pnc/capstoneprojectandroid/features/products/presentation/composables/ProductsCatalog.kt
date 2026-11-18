@@ -46,6 +46,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -94,6 +95,22 @@ fun ProductsList(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        bottomBar = {
+            AnimatedVisibility(visible = showButton) {
+                TextButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                    Text("Back to Home")
+                }
+            }
+        },
         floatingActionButton = {
             AnimatedVisibility(visible = showButton) {
                 FloatingActionButton(
@@ -188,11 +205,19 @@ fun ProductsList(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 4.dp),
                             placeholder = { Text("Search products...") },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = "Search Icon"
+                                )
+                            },
                             trailingIcon = {
                                 if (searchQuery.isNotEmpty()) {
                                     IconButton(onClick = { searchQuery = "" }) {
-                                        Icon(Icons.Default.Clear, contentDescription = "Clear Search")
+                                        Icon(
+                                            Icons.Default.Clear,
+                                            contentDescription = "Clear Search"
+                                        )
                                     }
                                 }
                             },

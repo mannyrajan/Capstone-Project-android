@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -40,17 +38,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+
 import com.pnc.capstoneprojectandroid.features.orders.domain.CustomerOrder
 import com.pnc.capstoneprojectandroid.features.orders.domain.OrderLine
 import com.pnc.capstoneprojectandroid.features.orders.domain.formatMoney
@@ -58,13 +52,10 @@ import com.pnc.capstoneprojectandroid.features.orders.domain.formatOrderDate
 import com.pnc.capstoneprojectandroid.features.orders.presentation.OrderHistoryUiState
 import com.pnc.capstoneprojectandroid.features.orders.presentation.OrderHistoryViewModel
 import com.pnc.capstoneprojectandroid.features.orders.presentation.ShipFilter
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
+
 
 @Composable
-fun OrderHistoryApp(
-    viewModel: OrderHistoryViewModel = hiltViewModel(), // injecting the viewmodel via hilt
-    onBack: () -> Unit // adding callback to go back to customer home page
-) {
+fun OrderHistoryApp(viewModel: OrderHistoryViewModel = viewModel()) {
     val state by viewModel.state.collectAsState()
     BackHandler(enabled = state.selected != null) { viewModel.closeOrder() }
 
@@ -76,7 +67,6 @@ fun OrderHistoryApp(
             onQueryChange = viewModel::onQueryChange,
             onFilterChange = viewModel::onFilterChange,
             onOpen = viewModel::openOrder,
-            onBack = onBack
         )
     } else {
         OrderDetailScreen(
@@ -95,46 +85,36 @@ private fun OrderListScreen(
     onQueryChange: (String) -> Unit,
     onFilterChange: (ShipFilter) -> Unit,
     onOpen: (CustomerOrder) -> Unit,
-    onBack: () -> Unit // added callback to go back to customer home page
 ) {
     Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text("Order history") },
-//                actions = {
-//                    IconButton(onClick = onRefresh) {
-//                        Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
-//                    }
-//                },
-//            )
-//        },
+        topBar = {
+            TopAppBar(
+                title = { Text("Order history") },
+                actions = {
+                    IconButton(onClick = onRefresh) {
+                        Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
+                    }
+                },
+            )
+        },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = onRefresh,
-            modifier = Modifier.padding(padding).fillMaxSize(),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
         ) {
             when {
                 state.isLoading -> {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .semantics { isTraversalGroup = true },
+                        modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.semantics {
-                                contentDescription = "Loading orders"
-                            }
-                        )
+                        CircularProgressIndicator()
                         Spacer(Modifier.height(12.dp))
-                        Text(
-                            "Loading orders…",
-                            modifier = Modifier.semantics {
-                                liveRegion = LiveRegionMode.Polite
-                            }
-                        )
+                        Text("Loading orders…")
                     }
                 }
 
@@ -148,141 +128,50 @@ private fun OrderListScreen(
 
                 else -> {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .semantics { isTraversalGroup = true },
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        // adding in custom blue header
-                        item {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    IconButton(
-                                        onClick = onBack,
-                                        modifier = Modifier.semantics {
-                                            contentDescription = "Back to Home"
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-                                    Text(
-                                        text = "Order History",
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    )
-                                    IconButton(
-                                        onClick = onRefresh,
-                                        modifier = Modifier.semantics {
-                                            contentDescription = "Refresh order history"
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.Refresh,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-
-                                }
-
-                            }
-                        }
                         item {
                             OutlinedTextField(
                                 value = state.query,
                                 onValueChange = onQueryChange,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .semantics {
-                                        contentDescription = "Search orders by customer name, order number, or customer ID"
-                                    },
+                                modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
-                                label = { Text("Search name, order #, or customer id") },
+                                label = { Text("Search by order number") },
                             )
                         }
                         item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    "Filter orders by shipping status",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.semantics { heading() }
-                                )
-                                FlowRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    ShipFilter.entries.forEach { filter ->
-                                        val selectedFilter = state.filter == filter
-                                        FilterChip(
-                                            selected = selectedFilter,
-                                            onClick = { onFilterChange(filter) },
-                                            label = {
-                                                Text(filter.name)
-                                            },
-                                            modifier = Modifier.semantics {
-                                                contentDescription = "${filter.name} orders filter"
-                                                stateDescription = if (selectedFilter) {
-                                                    "Selected"
-                                                } else {
-                                                    "Not selected"
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    "${state.visibleOrders.size} orders",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.semantics {
-                                        liveRegion = LiveRegionMode.Polite
-                                    }
-                                )
-                                state.errorMessage?.let {
-                                    Text(
-                                        it,
-                                        color = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.semantics {
-                                            liveRegion = LiveRegionMode.Polite
-                                        }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ShipFilter.entries.forEach { filter ->
+                                    FilterChip(
+                                        selected = state.filter == filter,
+                                        onClick = { onFilterChange(filter) },
+                                        label = { Text(filter.name) },
                                     )
                                 }
                             }
                         }
-                        if (state.visibleOrders.isEmpty()) {
-                            item {
+                        item {
+                            Text(
+                                "${state.visibleOrders.size} orders",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            state.errorMessage?.let {
                                 Text(
-                                    "No orders match that search.",
+                                    it,
+                                    color = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.semantics {
                                         liveRegion = LiveRegionMode.Polite
                                     }
                                 )
+                                Button(onClick = onRefresh) {
+                                    Text("Retry")
+                                }
                             }
+                        }
+                        if (state.visibleOrders.isEmpty()) {
+                            item { Text("No orders match that search.") }
                         }
                         items(state.visibleOrders, key = { it.orderNumber }) { order ->
                             OrderCard(order = order, onClick = { onOpen(order) })
@@ -290,33 +179,30 @@ private fun OrderListScreen(
                     }
                 }
             }
+            if (state.isRefreshing && state.orders.isNotEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(12.dp)
+                        .semantics { contentDescription = "Refreshing orders" }
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                role = Role.Button,
-                onClick = onClick
-            )
-            .semantics(mergeDescendants = true) {
-                contentDescription = "Order ${order.orderNumber}, ${order.customerName}, " +
-                        "${if (order.isShipped) "Shipped" else "Open"}, " +
-                        "${order.lines.size} order lines, ${order.itemCount} items, " +
-                        "total ${formatMoney(order.itemsTotal)}"
-            }
-    ) {
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .clickable(onClick = onClick)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "#${order.orderNumber}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 AssistChip(
                     onClick = {},
@@ -329,16 +215,13 @@ private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row {
                 Text(
-                    "${order.lines.size} lines · ${order.itemCount} items",
+                    "${order.itemCount} items",
                     modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
-                    formatMoney(order.itemsTotal),
-                    fontWeight = FontWeight.SemiBold
-                )
+                Text(formatMoney(order.itemsTotal), fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -354,23 +237,10 @@ private fun OrderDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "Order #${order.orderNumber}",
-                        modifier = Modifier.semantics { heading() }
-                    )
-                },
+                title = { Text("Order #${order.orderNumber}") },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.semantics {
-                            contentDescription = "Back to order history"
-                        }
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
             )
@@ -379,95 +249,74 @@ private fun OrderDetailScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize()
-                .semantics { isTraversalGroup = true },
+                .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        order.customerName,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.semantics { heading() }
-                    )
-                    Text(
-                        "Customer ${order.customerId}",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text("Ordered ${formatOrderDate(order.orderDate)}")
-                    Text(
-                        if (order.isShipped) {
-                            "Shipped ${formatOrderDate(order.shipDate)}"
-                        } else {
-                            "Not shipped"
-                        },
-                    )
-                }
+                Text(order.customerName, style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    "Ordered ${formatOrderDate(order.orderDate)}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = if (order.isShipped) "Shipped ${formatOrderDate(order.shipDate)}" else "Not yet shipped",
+                    color = if (order.isShipped) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (state.detailLoading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .semantics {
-                                    contentDescription = "Loading shipping details"
-                                }
-                        )
-                    }
-                    state.detailError?.let {
-                        Text(
-                            it,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.semantics {
-                                liveRegion = LiveRegionMode.Polite
+                if (state.detailLoading) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
+                state.detailError?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
+                state.shipping?.let { shipping ->
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(
+                            Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text("Shipping", style = MaterialTheme.typography.titleMedium)
+
+                            shipping.shipMethod?.takeIf { it.isNotBlank() }?.let {
+                                Text("Method: $it")
                             }
-                        )
-                    }
-                    state.shipping?.let { shipping ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Column(
-                                Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    "Shipping",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.semantics { heading() }
-                                )
-                                Text(shipping.shipMethod ?: "Ship method unavailable")
-                                Text(
-                                    shipping.trackingNumber?.takeIf { it.isNotBlank() }
-                                        ?: "No tracking number",
-                                )
-                                val phone = listOfNotNull(
-                                    shipping.phone,
-                                    shipping.phoneType?.let { "($it)" }
-                                ).joinToString(" ")
-                                if (phone.isNotBlank()) Text(phone)
-                                shipping.email?.let { Text(it) }
-                                Text("Tax ${formatMoney(shipping.tax)}")
-                                Text("Freight ${formatMoney(shipping.freight)}")
+                            shipping.trackingNumber?.takeIf { it.isNotBlank() }?.let {
+                                Text("Tracking: $it")
+                            } ?: Text("Tracking: Not available yet")
+
+                            val phone = listOfNotNull(
+                                shipping.phone?.takeIf { it.isNotBlank() },
+                                shipping.phoneType?.takeIf { it.isNotBlank() }?.let { "($it)" }
+                            ).joinToString(" ")
+                            if (phone.isNotBlank()) Text("Phone: $phone")
+
+                            shipping.email?.takeIf { it.isNotBlank() }?.let {
+                                Text("Email: $it")
                             }
+
+                            if (shipping.tax > 0) Text("Tax: ${formatMoney(shipping.tax)}")
+                            if (shipping.freight > 0) Text("Freight: ${formatMoney(shipping.freight)}")
                         }
                     }
                 }
             }
+
             item {
-                Text(
-                    "Items",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.semantics { heading() }
-                )
+                Text("Items", style = MaterialTheme.typography.titleMedium)
             }
             items(order.lines, key = { it.id }) { line ->
                 LineRow(line)
             }
+
             item {
                 Text(
                     "Items total ${formatMoney(order.itemsTotal)}",
                     style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -476,15 +325,7 @@ private fun OrderDetailScreen(
 
 @Composable
 private fun LineRow(line: OrderLine) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics(mergeDescendants = true) {
-                contentDescription = "${line.productName}, quantity ${line.quantity}, " +
-                        "${formatMoney(line.unitPrice)} each, " +
-                        "line total ${formatMoney(line.lineTotal)}"
-            }
-    ) {
+    Card(Modifier.fillMaxWidth()) {
         Row(
             Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -494,13 +335,11 @@ private fun LineRow(line: OrderLine) {
                 Text(
                     "Qty ${line.quantity} · ${formatMoney(line.unitPrice)} each",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             Spacer(Modifier.width(12.dp))
-            Text(
-                formatMoney(line.lineTotal),
-                fontWeight = FontWeight.SemiBold
-            )
+            Text(formatMoney(line.lineTotal), fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -510,21 +349,12 @@ private fun MessageBlock(message: String, actionLabel: String, onAction: () -> U
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .semantics { isTraversalGroup = true },
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            message,
-            modifier = Modifier.semantics {
-                liveRegion = LiveRegionMode.Polite
-            }
-        )
+        Text(message)
         Spacer(Modifier.height(12.dp))
-        Button(onClick = onAction) {
-            Text(actionLabel)
-        }
+        Button(onClick = onAction) { Text(actionLabel) }
     }
 }
-

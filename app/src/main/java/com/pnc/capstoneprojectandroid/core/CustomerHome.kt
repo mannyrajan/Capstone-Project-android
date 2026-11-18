@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,11 +19,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButtonDefaults.elevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +37,15 @@ import com.pnc.capstoneprojectandroid.features.products.presentation.RecentlyVie
 import com.pnc.capstoneprojectandroid.features.products.presentation.composables.ProductThumbnail
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.heightIn
 
 @Composable
 fun CustomerHomeScreen(
@@ -44,6 +56,7 @@ fun CustomerHomeScreen(
     // Grab Hilt ViewModel directly inside the screen composable
     val recentlyViewedViewModel: RecentlyViewedViewModel = hiltViewModel()
     val recentlyViewedProducts by recentlyViewedViewModel.recentlyViewedProducts.collectAsStateWithLifecycle()
+    val clearError by recentlyViewedViewModel.errorMessage.collectAsStateWithLifecycle()
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -68,7 +81,6 @@ fun CustomerHomeScreen(
                         .semantics { heading() }
                 )
             }
-
             // Product Catalog Button
             item {
                 Button(
@@ -92,36 +104,89 @@ fun CustomerHomeScreen(
                     Text("View Recent Orders")
                 }
             }
-
             // Recently Viewed Products Carousel
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "Recently Viewed Products",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.semantics { heading() }
-                    )
-
-                    if (recentlyViewedProducts.isEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "No recently viewed products yet.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "Recently Viewed Products",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .weight(1f)
+                                .semantics { heading() }
                         )
-                    } else {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        AnimatedVisibility(
+                            visible = recentlyViewedProducts.isNotEmpty(),
+                            enter = fadeIn(),
+                            exit = fadeOut()
                         ) {
-                            items(
-                                items = recentlyViewedProducts,
-                                key = { it.id }
-                            ) { product ->
-                                ProductCard(
-                                    product = product,
-                                    onClick = { onProductClick(product.id) }
-                                )
+                            TextButton(
+                                onClick = { recentlyViewedViewModel.clearHistory() },
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Clear recently viewed products"
+                                }
+                            ) {
+                                Text("Clear")
+                            }
+                        }
+                    }
+
+                    clearError?.let { message ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = message,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .semantics { liveRegion = LiveRegionMode.Polite }
+                            )
+                            TextButton(onClick = { recentlyViewedViewModel.dismissError() }) {
+                                Text("Dismiss")
+                            }
+                        }
+                    }
+
+                    AnimatedContent(
+                        targetState = recentlyViewedProducts,
+                        contentKey = { it.isEmpty() },
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(300)) togetherWith
+                                    fadeOut(animationSpec = tween(200))
+                        },
+                        label = "recentlyViewedCarousel"
+                    ) { products ->
+                        if (products.isEmpty()) {
+                            Text(
+                                text = "No recently viewed products yet.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.semantics {
+                                    liveRegion = LiveRegionMode.Polite
+                                }
+                            )
+                        } else {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(
+                                    items = products,
+                                    key = { it.id }
+                                ) { product ->
+                                    ProductCard(
+                                        product = product,
+                                        onClick = { onProductClick(product.id) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -130,6 +195,7 @@ fun CustomerHomeScreen(
         }
     }
 }
+
 
 @Composable
 fun ProductCard(
@@ -187,3 +253,5 @@ fun ProductCard(
         }
     }
 }
+
+

@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.features.products.presentation.state
 
 import com.pnc.capstoneprojectandroid.features.products.domain.Products

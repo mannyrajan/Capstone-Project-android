@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.features.products.presentation.composables
 
 import androidx.compose.foundation.clickable

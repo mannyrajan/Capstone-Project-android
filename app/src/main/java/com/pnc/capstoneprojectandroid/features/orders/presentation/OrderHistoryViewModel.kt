@@ -39,9 +39,7 @@ data class OrderHistoryUiState(
                     ShipFilter.Open -> !order.isShipped
                 }
                 val matchesQuery = q.isEmpty() ||
-                        order.orderNumber.toString().contains(q) ||
-                        order.customerName.contains(q, ignoreCase = true) ||
-                        order.customerId.toString().contains(q)
+                        order.orderNumber.toString().contains(q)
                 matchesFilter && matchesQuery
             }
         }
@@ -73,7 +71,13 @@ class OrderHistoryViewModel @Inject constructor(
                 val noahOrders = allOrders.filter { order ->
                     order.customerName.equals("Noah A Hall", ignoreCase = true)
                 }
-                _state.update { it.copy(isLoading = false, isRefreshing = false, orders = noahOrders) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        orders = noahOrders
+                    )
+                }
             } catch (error: Exception) {
                 _state.update {
                     it.copy(
@@ -103,7 +107,12 @@ class OrderHistoryViewModel @Inject constructor(
                 val shipping = repository.getShipping(order.representativeLineId)
                 _state.update { it.copy(detailLoading = false, shipping = shipping) }
             } catch (error: Exception) {
-                _state.update { it.copy(detailLoading = false, detailError = error.toUserMessage()) }
+                _state.update {
+                    it.copy(
+                        detailLoading = false,
+                        detailError = error.toUserMessage()
+                    )
+                }
             }
         }
     }

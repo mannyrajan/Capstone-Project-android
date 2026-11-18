@@ -1,6 +1,6 @@
 package com.pnc.capstoneprojectandroid.features.products.domain
 
-data class Products (
+data class Products(
     val id: Int,
     val name: String,
     val productNumber: String,

@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.features.products.presentation
 
 import androidx.lifecycle.SavedStateHandle
@@ -90,7 +89,7 @@ class ProductDetailsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 // always rethrow cancellation
                 throw e
-            } catch (e: HttpException){
+            } catch (e: HttpException) {
                 // handle server error codes
                 val message = if (e.code() in 500..599) {
                     "Server error: ${e.code()}"
@@ -108,8 +107,10 @@ class ProductDetailsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false,
-                            errorMessage = "Something went wrong while processing data. Please try again.")
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Something went wrong while processing data. Please try again."
+                    )
                 }
             }
         }

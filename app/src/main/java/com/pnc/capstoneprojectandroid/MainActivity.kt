@@ -62,7 +62,9 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(
                                 route = "products/{productId}",
-                                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                                arguments = listOf(navArgument("productId") {
+                                    type = NavType.IntType
+                                })
                             ) {
                                 // adding back in padding to the details screen
                                 Box(modifier = Modifier.padding(innerPadding)) {
@@ -71,7 +73,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(route = "order_history") {
                                 OrderHistoryApp(
-                                  onBack = { navController.popBackStack() }
+                                    onBack = { navController.popBackStack() }
                                 )
                             }
                             composable(route = "saved") {

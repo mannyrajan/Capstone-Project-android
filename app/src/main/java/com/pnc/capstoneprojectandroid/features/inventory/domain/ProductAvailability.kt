@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.features.inventory.domain
 
 enum class ProductAvailability {

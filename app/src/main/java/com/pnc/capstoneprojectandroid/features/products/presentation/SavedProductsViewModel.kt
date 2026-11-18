@@ -38,9 +38,9 @@ class SavedProductsViewModel @Inject constructor(
                     }
                     _uiState.update {
                         it.copy(
-                        products = products,
-                        isLoading = false,
-                        errorMessage = null
+                            products = products,
+                            isLoading = false,
+                            errorMessage = null
                         )
                     }
                 }
@@ -50,7 +50,8 @@ class SavedProductsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Something went wrong while processing data. Please try again.")
+                        errorMessage = "Something went wrong while processing data. Please try again."
+                    )
                 }
             }
         }

@@ -1,4 +1,3 @@
-
 package com.pnc.capstoneprojectandroid.features.products.data
 
 import androidx.room.Entity

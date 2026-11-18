@@ -24,6 +24,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pnc.capstoneprojectandroid.features.products.presentation.ProductsCatalogViewModel
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.TextButton
 
 @Composable
 fun ProductsScreen(
@@ -113,6 +114,9 @@ fun ProductsScreen(
 
                 Button(onClick = { viewModel.loadProducts() }) {
                     Text("Retry")
+                }
+                TextButton(onClick = onBack) {
+                    Text("Back")
                 }
             }
         }

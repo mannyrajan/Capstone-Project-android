@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -62,17 +63,34 @@ fun ProductDetailsScreen(
             state.errorMessage != null -> Column(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .semantics { isTraversalGroup = true },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
+                    text = "Unable to Load Product",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.semantics { heading() }
+                )
+
+                Text(
                     state.errorMessage ?: "",
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                    modifier = Modifier.semantics {
+                        liveRegion = LiveRegionMode.Polite
+                    }
                 )
-                Button(onClick = { viewModel.load() }) { Text("Retry") }
-                TextButton(onClick = onBack) { Text("Back") }
+
+                Button(
+                    onClick = { viewModel.load() }
+                ) {
+                    Text("Retry")
+                }
+
+                TextButton(onClick = onBack) {
+                    Text("Back to Products")
+                }
             }
 
             state.product != null -> ProductDetailsContent(
@@ -107,10 +125,6 @@ fun ProductDetailsContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             DetailsHeader(name = product.name, onBack = onBack)
-            Text(
-                text = "ID #${product.id}",
-                style = MaterialTheme.typography.titleMedium
-            )
             Text(
                 text = "Product number: ${product.productNumber}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -226,9 +240,9 @@ private fun ProductInfoCard(product: Products) {
                 vertical = 4.dp
             )
         ) {
-            DetailRow("Color", product.color.ifBlank { "N/A" })
+            DetailRow("Color", product.color.ifBlank { "Not available" })
             HorizontalDivider()
-            DetailRow("Summary", product.summary.ifBlank { "No summary available" })
+            DetailRow("Summary", product.summary.ifBlank { "No description available" })
         }
     }
 }
@@ -254,7 +268,7 @@ private fun ProductPriceCard(product: Products) {
                 style = MaterialTheme.typography.headlineLarge
             )
             Text(
-                text = "Warranty: ${product.warranty.ifBlank { "None" }}",
+                text = "Warranty: ${product.warranty.ifBlank { "Warranty information not available" }}",
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center
             )

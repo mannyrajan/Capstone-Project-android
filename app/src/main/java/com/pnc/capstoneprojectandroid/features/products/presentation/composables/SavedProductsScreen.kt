@@ -126,9 +126,9 @@ fun SavedProductsScreen(
                                 contentDescription = product.name
                             )
                         }
-                        }
                     }
                 }
             }
         }
     }
+}

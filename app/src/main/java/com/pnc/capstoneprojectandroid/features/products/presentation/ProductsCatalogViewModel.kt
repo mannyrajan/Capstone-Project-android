@@ -61,7 +61,7 @@ class ProductsCatalogViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 // coroutine cancellation
                 throw e
-            } catch ( e: HttpException) {
+            } catch (e: HttpException) {
                 // connectivity failure
                 val message = if (e.code() in 500..599) {
                     "Server error: ${e.code()}"

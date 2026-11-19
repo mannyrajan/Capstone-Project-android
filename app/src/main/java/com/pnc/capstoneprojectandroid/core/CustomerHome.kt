@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -201,7 +205,8 @@ fun CustomerHomeScreen(
                 SavedProductsCarousel(
                     products = savedState.products,
                     onProductClick = onProductClick,
-                    onViewAll = onNavigateToSaved
+                    onViewAll = onNavigateToSaved,
+                    onUnsave = { product -> savedViewModel.toggleSaved(product) }
                 )
             }
         }
@@ -213,6 +218,7 @@ fun SavedProductsCarousel(
     products: List<Products>,
     onProductClick: (Int) -> Unit,
     onViewAll: () -> Unit,
+    onUnsave: (Products) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -232,26 +238,45 @@ fun SavedProductsCarousel(
                     .weight(1f)
                     .semantics { heading() }
             )
-            if (products.isNotEmpty()) {
+            AnimatedVisibility(
+                visible = products.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 TextButton(onClick = onViewAll) {
                     Text("View all")
                 }
             }
         }
 
-        if (products.isEmpty()) {
-            Text(
-                text = "No saved products yet.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(products, key = { it.id }) { product ->
-                    ProductCard(
-                        product = product,
-                        onClick = { onProductClick(product.id) }
-                    )
+        AnimatedContent(
+            targetState = products,
+            contentKey = { it.isEmpty() },
+            transitionSpec = {
+                fadeIn(animationSpec = tween(300)) togetherWith
+                        fadeOut(animationSpec = tween(200))
+            },
+            label = "savedProductsCarousel"
+        ) { savedProducts ->
+            if (savedProducts.isEmpty()) {
+                Text(
+                    text = "No saved products yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.semantics {
+                        liveRegion = LiveRegionMode.Polite
+                    }
+                )
+            } else {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(savedProducts, key = { it.id }) { product ->
+                        ProductCard(
+                            product = product,
+                            onClick = { onProductClick(product.id) },
+                            modifier = Modifier.animateItem(),
+                            onUnsave = { onUnsave(product) }
+                        )
+                    }
                 }
             }
         }
@@ -261,54 +286,76 @@ fun SavedProductsCarousel(
 @Composable
 fun ProductCard(
     product: Products,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onUnsave: (() -> Unit)? = null
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .width(150.dp)
             .clickable(onClickLabel = "View details", onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(
+                    start = 10.dp,
+                    top = if (onUnsave != null) 34.dp else 10.dp,
+                    end = 10.dp,
+                    bottom = 10.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProductThumbnail(
-                    base64 = product.thumbnailBase64,
-                    contentDescription = product.name,
-                    size = 90.dp
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ProductThumbnail(
+                        base64 = product.thumbnailBase64,
+                        contentDescription = product.name,
+                        size = 90.dp
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = product.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Text(
+                        text = NumberFormat.getCurrencyInstance(Locale.US).format(product.price),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = product.productNumber,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Text(
-                    text = NumberFormat.getCurrencyInstance(Locale.US).format(product.price),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Text(
-                    text = product.productNumber,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            if (onUnsave != null) {
+                IconButton(
+                    onClick = onUnsave,
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = "Remove ${product.name} from saved products",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -60,7 +63,7 @@ import com.pnc.capstoneprojectandroid.features.orders.presentation.ShipFilter
 import androidx.compose.material3.TextButton
 
 @Composable
-fun OrderHistoryApp(
+fun LegacyOrderHistoryApp(
     viewModel: OrderHistoryViewModel = hiltViewModel(), // injecting the viewmodel via hilt
     onBack: () -> Unit // adding callback to go back to customer home page
 ) {
@@ -69,7 +72,7 @@ fun OrderHistoryApp(
 
     val selected = state.selected
     if (selected == null) {
-        OrderListScreen(
+        LegacyOrderListScreen(
             state = state,
             onRefresh = { viewModel.refresh() },
             onQueryChange = viewModel::onQueryChange,
@@ -78,7 +81,7 @@ fun OrderHistoryApp(
             onBack = onBack
         )
     } else {
-        OrderDetailScreen(
+        LegacyOrderDetailScreen(
             order = selected,
             state = state,
             onBack = viewModel::closeOrder,
@@ -88,7 +91,7 @@ fun OrderHistoryApp(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OrderListScreen(
+private fun LegacyOrderListScreen(
     state: OrderHistoryUiState,
     onRefresh: () -> Unit,
     onQueryChange: (String) -> Unit,
@@ -140,7 +143,7 @@ private fun OrderListScreen(
                 }
 
                 state.orders.isEmpty() && state.errorMessage != null -> {
-                    MessageBlock(
+                    LegacyMessageBlock(
                         message = state.errorMessage,
                         actionLabel = "Try again",
                         onAction = onRefresh,
@@ -209,13 +212,26 @@ private fun OrderListScreen(
                             OutlinedTextField(
                                 value = state.query,
                                 onValueChange = onQueryChange,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .semantics {
-                                        contentDescription = "Search orders by order number"
-                                    },
+                                modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
                                 label = { Text("Search by order number") },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = "Search Icon"
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (state.query.isNotEmpty()) {
+                                        IconButton(onClick = { onQueryChange("") }) {
+                                            Icon(
+                                                Icons.Default.Clear,
+                                                contentDescription = "Clear Search"
+                                            )
+                                        }
+                                    }
+                                },
+                                shape = RoundedCornerShape(8.dp)
                             )
                         }
                         item {
@@ -290,7 +306,7 @@ private fun OrderListScreen(
                             }
                         }
                         items(state.visibleOrders, key = { it.orderNumber }) { order ->
-                            OrderCard(order = order, onClick = { onOpen(order) })
+                            LegacyOrderCard(order = order, onClick = { onOpen(order) })
                         }
                     }
                 }
@@ -308,7 +324,7 @@ private fun OrderListScreen(
 }
 
 @Composable
-private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
+private fun LegacyOrderCard(order: CustomerOrder, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -358,7 +374,7 @@ private fun OrderCard(order: CustomerOrder, onClick: () -> Unit) {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OrderDetailScreen(
+private fun LegacyOrderDetailScreen(
     order: CustomerOrder,
     state: OrderHistoryUiState,
     onBack: () -> Unit,
@@ -477,7 +493,7 @@ private fun OrderDetailScreen(
                 )
             }
             items(order.lines, key = { it.id }) { line ->
-                LineRow(line)
+                LegacyLineRow(line)
             }
             item {
                 Text(
@@ -490,7 +506,7 @@ private fun OrderDetailScreen(
 }
 
 @Composable
-private fun LineRow(line: OrderLine) {
+private fun LegacyLineRow(line: OrderLine) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -521,7 +537,7 @@ private fun LineRow(line: OrderLine) {
 }
 
 @Composable
-private fun MessageBlock(
+private fun LegacyMessageBlock(
     message: String,
     actionLabel: String,
     onAction: () -> Unit,

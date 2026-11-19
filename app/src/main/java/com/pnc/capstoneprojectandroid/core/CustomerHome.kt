@@ -204,6 +204,8 @@ fun CustomerHomeScreen(
             item {
                 SavedProductsCarousel(
                     products = savedState.products,
+                    errorMessage = savedState.errorMessage,
+                    onDismissError = { savedViewModel.dismissError() },
                     onProductClick = onProductClick,
                     onViewAll = onNavigateToSaved,
                     onUnsave = { product -> savedViewModel.toggleSaved(product) }
@@ -216,6 +218,8 @@ fun CustomerHomeScreen(
 @Composable
 fun SavedProductsCarousel(
     products: List<Products>,
+    errorMessage: String?,
+    onDismissError: () -> Unit,
     onProductClick: (Int) -> Unit,
     onViewAll: () -> Unit,
     onUnsave: (Products) -> Unit,
@@ -245,6 +249,23 @@ fun SavedProductsCarousel(
             ) {
                 TextButton(onClick = onViewAll) {
                     Text("View all")
+                }
+            }
+        }
+        errorMessage?.let { message ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics { liveRegion = LiveRegionMode.Polite }
+                )
+                TextButton(onClick = onDismissError) {
+                    Text("Dismiss")
                 }
             }
         }

@@ -268,6 +268,11 @@ private fun OrderDetailScreen(
                     color = if (order.customerFacingStatus == "Shipped") MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Text(
+                    text = order.statusExplanation,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             item {

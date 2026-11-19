@@ -30,6 +30,10 @@ data class CustomerOrder(
     // customer facing status string adhering to requirement 12
     val customerFacingStatus: String
         get() = OrderStatusClassifier.displayLabelFor(status, statusName)
+
+    // customer explantation of order status
+    val statusExplanation: String
+        get() = OrderStatusClassifier.explanationFor(status, statusName)
 }
 
 data class OrderShipping(
@@ -80,6 +84,20 @@ object OrderStatusClassifier {
     }
     fun displayLabelFor(statusCode: Int?, statusName: String?): String {
         return displayLabel(classify(statusCode, statusName))
+    }
+
+    fun explanation(status: OrderStatus): String {
+        return when (status) {
+            OrderStatus.PROCESSING -> "Your order is being prepared."
+            OrderStatus.SHIPPED -> "Your order is on the way."
+            OrderStatus.DELIVERED -> "Your order has been delivered."
+            OrderStatus.CANCELLED -> "This order was cancelled."
+            OrderStatus.UNKNOWN -> "Status details are currently unavailable."
+        }
+    }
+
+    fun explanationFor(statusCode: Int?, statusName: String?): String {
+        return explanation(classify(statusCode, statusName))
     }
 }
 

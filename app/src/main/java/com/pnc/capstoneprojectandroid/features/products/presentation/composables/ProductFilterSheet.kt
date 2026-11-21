@@ -31,6 +31,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.pnc.capstoneprojectandroid.features.products.presentation.state.ProductCatalogState
 
+private const val DEFAULT_MAX_PRICE_FALLBACK = 500f
+private const val PRICE_SLIDER_STEP = 50f
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ProductFilterSheet(
@@ -42,7 +45,6 @@ fun ProductFilterSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState
@@ -157,13 +159,14 @@ fun ProductFilterSheet(
                         }
                     }
                 }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // 3. Price Filter Slider with Rounded Limits & Whole Numbers
+                    val rawMax = state.products.maxOfOrNull { it.price.toFloat() } ?: DEFAULT_MAX_PRICE_FALLBACK
+                    // Round up to the nearest $50 increment (e.g., $342 becomes $350)
+                    val maxCatalogPrice = kotlin.math.ceil(rawMax / PRICE_SLIDER_STEP) * PRICE_SLIDER_STEP
 
-                // 3. Price Filter Slider with Rounded Limits & Whole Numbers
-                val rawMax = state.products.maxOfOrNull { it.price.toFloat() } ?: 500f
-                // Round up to the nearest $50 increment (e.g., $342 becomes $350)
-                val maxCatalogPrice = kotlin.math.ceil(rawMax / 50f) * 50f
-
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         // Use %.0f instead of %.2f to strip out the cents completely
                         text = "Max Price: $${

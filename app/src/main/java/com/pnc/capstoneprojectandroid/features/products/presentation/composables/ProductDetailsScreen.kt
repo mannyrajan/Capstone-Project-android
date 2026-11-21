@@ -94,14 +94,18 @@ fun ProductDetailsScreen(
                     Text("Back to Products")
                 }
             }
-
-            state.product != null -> ProductDetailsContent(
-                product = state.product!!,
-                availability = state.availability,
-                isSaved = state.isSaved, // passing state here
-                onToggleSave = { viewModel.toggleSaved() }, // passing action here
-                onBack = onBack
-            )
+            else -> {
+                val product = state.product
+                if (product != null) {
+                    ProductDetailsContent(
+                        product = product,
+                        availability = state.availability,
+                        isSaved = state.isSaved, // passing state here
+                        onToggleSave = { viewModel.toggleSaved() }, // passing action here
+                        onBack = onBack
+                    )
+                }
+            }
         }
     }
 }

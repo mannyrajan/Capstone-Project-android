@@ -57,22 +57,24 @@ enum class OrderStatus {
 
 object OrderStatusClassifier {
     fun classify(statusCode: Int?, statusName: String?): OrderStatus {
-        // check numeric status code first
-        when (statusCode) {
-            1,2 -> return OrderStatus.PROCESSING
-            5 -> return OrderStatus.SHIPPED
-            6 -> return OrderStatus.DELIVERED
-            7 -> return OrderStatus.CANCELLED
+        // explicit statusName from API when available
+        val normalizedName = statusName?.trim()?.uppercase()
+        if (!normalizedName.isNullOrEmpty()) {
+            when (normalizedName) {
+                "PROCESSING", "PENDING", "OPEN" -> return OrderStatus.PROCESSING
+                "SHIPPED" -> return OrderStatus.SHIPPED
+                "DELIVERED" -> return OrderStatus.DELIVERED
+                "CANCELLED", "CANC" -> return OrderStatus.CANCELLED
+            }
         }
-        // fallback to status name
-        return when (statusName?.trim()?.uppercase()) {
-            "PROCESSING", "PENDING", "OPEN" -> OrderStatus.PROCESSING
-            "SHIPPED" -> OrderStatus.SHIPPED
-            "DELIVERED" -> OrderStatus.DELIVERED
-            "CANCELLED", "CANC" -> OrderStatus.CANCELLED
+
+        // only hard map numeric codes verified from API data
+        return when (statusCode) {
+            5 -> OrderStatus.SHIPPED
             else -> OrderStatus.UNKNOWN // safe fall back
+        }
     }
-}
+
     fun displayLabel(status: OrderStatus): String {
         return when (status) {
             OrderStatus.PROCESSING -> "Processing"
@@ -82,6 +84,7 @@ object OrderStatusClassifier {
             OrderStatus.UNKNOWN -> "Unknown Status"
         }
     }
+
     fun displayLabelFor(statusCode: Int?, statusName: String?): String {
         return displayLabel(classify(statusCode, statusName))
     }

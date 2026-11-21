@@ -429,6 +429,16 @@ private fun OrderDetailScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.semantics { heading() }
                     )
+                    Text(
+                        "Status: ${order.customerFacingStatus}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        order.statusExplanation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text("Ordered ${formatOrderDate(order.orderDate)}")
                     Text(
                         if (order.isShipped) {

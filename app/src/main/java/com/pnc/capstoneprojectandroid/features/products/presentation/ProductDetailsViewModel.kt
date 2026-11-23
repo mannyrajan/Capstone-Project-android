@@ -17,8 +17,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withTimeoutOrNull
 import retrofit2.HttpException
 import java.io.IOException
+import java.io.InterruptedIOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,48 +65,26 @@ class ProductDetailsViewModel @Inject constructor(
             }
 
             try {
-                val product = repository.getProduct(productId)
+                supervisorScope {
+                    launch { loadAvailability() }
 
-                _uiState.update {
-                    it.copy(product = product, isLoading = false)
-                }
-
-                // Record the product in Recently Viewed.
-                try {
-                    recentlyViewedRepository.addRecentlyViewed(product)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    // Product details should remain visible.
-                }
-
-                // Retrieve and classify inventory separately.
-                try {
-                    val inventory = inventoryRepository.getInventory()
-                    val matchingItem = inventory.firstOrNull {
-                        it.productId == product.id
-                    }
-
-                    val availability = if (matchingItem == null) {
-                        ProductAvailability.UNKNOWN
-                    } else {
-                        ProductAvailabilityClassifier.classify(
-                            quantity = matchingItem.quantity,
-                            reorderPoint = matchingItem.reorderPoint
-                        )
-                    }
+                    val product = repository.getProduct(productId)
 
                     _uiState.update {
-                        it.copy(availability = availability)
+                        it.copy(product = product, isLoading = false)
                     }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    _uiState.update {
-                        it.copy(availability = ProductAvailability.UNKNOWN)
+
+                    // Record the product in Recently Viewed.
+                    launch {
+                        try {
+                            recentlyViewedRepository.addRecentlyViewed(product)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            // Product details should remain visible.
+                        }
                     }
                 }
-
             } catch (e: CancellationException) {
                 // always rethrow cancellation
                 throw e
@@ -115,6 +96,10 @@ class ProductDetailsViewModel @Inject constructor(
                     "Request failed: ${e.code()}"
                 }
                 _uiState.update { it.copy(isLoading = false, errorMessage = message) }
+            } catch (e: InterruptedIOException) {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = "The request timed out. Please try again.")
+                }
             } catch (e: IOException) {
                 // handle network errors
                 _uiState.update {
@@ -131,6 +116,27 @@ class ProductDetailsViewModel @Inject constructor(
                     )
                 }
             }
+
         }
+    }
+
+    private suspend fun loadAvailability() {
+        val availability = try {
+            val inventory = withTimeoutOrNull(5_000) { inventoryRepository.getInventory() }
+            val matchingItem = inventory?.firstOrNull { it.productId == productId }
+            if (matchingItem == null) {
+                ProductAvailability.UNKNOWN
+            } else {
+                ProductAvailabilityClassifier.classify(
+                    quantity = matchingItem.quantity,
+                    reorderPoint = matchingItem.reorderPoint
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            ProductAvailability.UNKNOWN
+        }
+        _uiState.update { it.copy(availability = availability) }
     }
 }

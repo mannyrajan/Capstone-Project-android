@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.InterruptedIOException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
@@ -125,5 +126,6 @@ class OrderHistoryViewModel @Inject constructor(
 private fun Throwable.toUserMessage(): String = when (this) {
     is UnknownHostException -> "No internet connection."
     is HttpException -> "The server returned HTTP ${code()}."
+    is InterruptedIOException -> "The request timed out. Please try again."
     else -> message?.takeIf { it.isNotBlank() } ?: "Couldn't load orders."
 }

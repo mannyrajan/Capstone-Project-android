@@ -6,6 +6,7 @@ import com.pnc.capstoneprojectandroid.features.products.domain.Products
 import com.pnc.capstoneprojectandroid.features.products.domain.SavedProductsRepository
 import com.pnc.capstoneprojectandroid.features.products.presentation.state.SavedProductsState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,17 +28,16 @@ class SavedProductsViewModel @Inject constructor(
         load()
     }
 
+    private var loadJob: Job? = null
+
     fun load() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            _uiState.update { state -> state.copy(isLoading = true, errorMessage = null) }
             savedRepository.observeSaved()
-                .catch { e ->
-                    if (e is CancellationException) throw e
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = e.message ?: "Couldn't load saved products"
-                        )
+                .catch {
+                    _uiState.update { state ->
+                        state.copy(isLoading = false, errorMessage = "Couldn't load saved products")
                     }
                 }
                 .collect { products ->
@@ -49,16 +49,12 @@ class SavedProductsViewModel @Inject constructor(
     }
     fun toggleSaved(product: Products) {
         viewModelScope.launch {
-            _uiState.update { it.copy(errorMessage = null) }
-
             try {
                 savedRepository.toggleSaved(product)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(errorMessage = e.message ?: "Couldn't update saved products")
-                }
+                _uiState.update { it.copy(errorMessage = "Couldn't update saved products") }
             }
         }
     }

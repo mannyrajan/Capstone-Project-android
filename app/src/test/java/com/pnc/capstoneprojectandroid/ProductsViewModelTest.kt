@@ -20,14 +20,26 @@ class TestProductsViewModel {
     private val _uiState = MutableStateFlow<ProductUiState>(ProductUiState.Loading)
     val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
 
-    fun loadProducts(shouldFail: Boolean) {
+    fun loadProducts(
+        shouldFail: Boolean,
+        products: List<Products> = listOf(
+            Products(
+                id = 1,
+                name = "Test Bike",
+                productNumber = "TB-01",
+                price = 299.99,
+                summary = "",
+                thumbnailBase64 = "",
+                warranty = "",
+                color = ""
+            )
+        )
+    ) {
         _uiState.value = ProductUiState.Loading
         if (shouldFail) {
             _uiState.value = ProductUiState.Error("Network error: Failed to fetch products")
         } else {
-            _uiState.value = ProductUiState.Success(
-                listOf(Products(id = 1, name = "Test Bike", productNumber = "TB-01", price = 299.99, summary = "", thumbnailBase64 = "", warranty = "", color = ""))
-            )
+            _uiState.value = ProductUiState.Success(products)
         }
     }
 }
@@ -51,6 +63,17 @@ class ProductsViewModelTest {
     }
 
     @Test
+    fun testViewModelEmptySuccessPath() = runTest {
+        val viewModel = TestProductsViewModel()
+
+        viewModel.loadProducts(shouldFail = false, products = emptyList())
+
+        val currentState = viewModel.uiState.value
+        assertTrue(currentState is ProductUiState.Success)
+        assertTrue((currentState as ProductUiState.Success).products.isEmpty())
+    }
+
+    @Test
     fun testViewModelErrorFailurePath() = runTest {
         val viewModel = TestProductsViewModel()
 
@@ -59,6 +82,9 @@ class ProductsViewModelTest {
 
         val currentState = viewModel.uiState.value
         assertTrue(currentState is ProductUiState.Error)
-        assertEquals("Network error: Failed to fetch products", (currentState as ProductUiState.Error).message)
+        assertEquals(
+            "Network error: Failed to fetch products",
+            (currentState as ProductUiState.Error).message
+        )
     }
 }

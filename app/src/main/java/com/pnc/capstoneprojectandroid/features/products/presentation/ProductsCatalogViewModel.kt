@@ -14,6 +14,7 @@ import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import retrofit2.HttpException
 import java.io.IOException
+import java.io.InterruptedIOException
 
 @HiltViewModel
 class ProductsCatalogViewModel @Inject constructor(
@@ -68,6 +69,7 @@ class ProductsCatalogViewModel @Inject constructor(
                 } else {
                     "Request failed: ${e.code()}"
                 }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -75,6 +77,15 @@ class ProductsCatalogViewModel @Inject constructor(
                         errorMessage = message
                     )
                 }
+            } catch (e: InterruptedIOException) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        errorMessage = "The request timed out. Please try again."
+                    )
+                }
+            } catch (e: IOException) {
             } catch (e: IOException) {
                 // connectivity failure
                 _uiState.update {

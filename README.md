@@ -16,7 +16,7 @@ git clone https://github.com/mannyrajan/Capstone-Project-android/
 - Select Open and navigate to the cloned repository.
 - Allow Gradle to sync and install the required dependencies.
 
-### 3. Configure the Base URL
+### 3. Configure the Base URL & Demo Customer
 
 The application uses the provided bootcamp API.
 
@@ -26,7 +26,7 @@ Default Base URL:
 https://api.bootcampcentral.com
 ```
 
-The base URL is configured in 'NetworkModule.kt' through Retrofit.
+The base URL is configured in `NetworkModule.kt` through Retrofit. Order and account screens use a predefined demo customer configuration, and no secrets, API keys, or local machine paths are stored in the repository.
 
 ### 4. Build and Run
 
@@ -38,3 +38,18 @@ The base URL is configured in 'NetworkModule.kt' through Retrofit.
 ## Known Limitations
 - The application uses a predefined demo customer.
 - Product & Order data require an internet connection.
+- - Final product backlog and Scrum artifacts are maintained alongside the project deliverables rather than bundled inside app source code.
+
+
+## Automated Tests
+
+Unit tests are located under `app/src/test/java/com/pnc/capstoneprojectandroid/`:
+- `OrdersTest.kt`
+- `ProductCatalogTest.kt`
+- `ProductsViewModelTest.kt`
+- `RecentHistoryTest.kt`
+- `SavedProductTest.kt`
+
+Run the automated tests from the command line:
+```bash
+./gradlew test
